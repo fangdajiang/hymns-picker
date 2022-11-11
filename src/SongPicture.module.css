@@ -1,0 +1,8 @@
+.songPic {
+  color: #005ba6;
+}
+.songPic:hover {
+  color: #ffffff;
+  background-color: #005ba6;
+  cursor: pointer;
+}

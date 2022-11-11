@@ -1,0 +1,8 @@
+.songName {
+  color: #005ba6;
+}
+.songName:hover {
+  color: #ffffff;
+  background-color: #005ba6;
+  cursor: pointer;
+}

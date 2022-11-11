@@ -1,0 +1,3 @@
+{
+    "label_config": "<View>\n  <Text name=\"text\" value=\"$text\"/>\n  <Taxonomy name=\"taxonomy\" toName=\"text\">\n    <Choice value=\"神\"/>\n    <Choice value=\"颂赞\"/>\n    <Choice value=\"认罪/悔改\"/>\n    <Choice value=\"救赎\"/>\n    <Choice value=\"情绪/节奏\"/>\n    <Choice value=\"关键词\"/>\n    <Choice value=\"教会/宗教改革\"/>\n    <Choice value=\"节期\"/>\n    </Taxonomy>\n</View>"
+}
