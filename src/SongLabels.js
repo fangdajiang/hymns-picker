@@ -1,11 +1,11 @@
 import React from 'react';
-import axios from 'axios'
 import {MContext} from "./index";
 
 const PROJECT_API_URL = 'http://localhost:8080/api/dm/project';
 const LABEL_LINKS_API_URL = 'http://localhost:8080/api/label_links?project=1&expand=label';
-const ANNOTATED_TASKS_API_URL = 'http://localhost:8080/api/tasks?view=2';
+const ANNOTATED_TASKS_API_URL = 'http://localhost:8080/api/tasks?view=';
 const TASK_API_PREFIX_URL = 'http://localhost:8080/api/tasks/';
+const VIEWS_API_URL = 'http://localhost:8080/api/dm/views';
 
 const NOT_AVAILABLE = "(请稍等)"
 
@@ -35,19 +35,28 @@ class SongLabels extends React.Component {
     }
     //请求接口的方法
     async fetchData(url) {
-        return axios.get(url, {
+        return fetch(url, {
             headers: {
                 'Authorization': `token ${token}`
-            }
-        }).then(res => res.data)
+            },
+            method: 'GET'
+        })
+        .then(response => response.json())
+        .catch(function (error) {
+            console.log(error);
+        });
     }
     async getAnnotatedTasks() {
+        let viewsResp = await this.fetchData(VIEWS_API_URL);
         let taskIds = []
-        let resp = await this.fetchData(ANNOTATED_TASKS_API_URL);
+        let viewId = viewsResp[0].id
+        console.log("view id: " + viewId)
+        console.log("fetching: " + ANNOTATED_TASKS_API_URL + viewId)
+        let resp = await this.fetchData(ANNOTATED_TASKS_API_URL + viewId);
         resp.tasks.forEach((task,taskKey)=>{
             taskIds[taskKey] = task.id
         })
-        return taskIds
+        return taskIds;
     }
     async getTasks(taskIds) {
         let songNames = ""
@@ -72,44 +81,24 @@ class SongLabels extends React.Component {
         return songNames
     }
 
-    getBasicLabels=()=>{
+    async getBasicLabels() {
         console.log("getting basic labels")
 
-        axios.get(PROJECT_API_URL, {
-            headers: {
-                'Authorization': `token ${token}`
-            }
+        let resp = await this.fetchData(PROJECT_API_URL);
+        console.log(resp.parsed_label_config.taxonomy.labels);
+        this.setState({
+            total_tasks_count:resp.task_count,
+            annotated_tasks_count:resp.annotation_count, //may not accurate, will be overridden by 'total' from ANNOTATED_TASKS_API_URL
+            basic_labels:resp.parsed_label_config.taxonomy.labels,
         })
-        .then((response) =>{
-            console.log(response.data.parsed_label_config.taxonomy.labels);
-            //用到this需要注意指向，箭头函数
-            this.setState({
-                total_tasks_count:response.data.task_count,
-                annotated_tasks_count:response.data.annotation_count, //may not accurate, will be overridden by 'total' from ANNOTATED_TASKS_API_URL
-                basic_labels:response.data.parsed_label_config.taxonomy.labels,
-            })
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
     }
-    getSongLabels=()=>{
+    async getSongLabels() {
         console.log("getting song labels")
 
-        axios.get(LABEL_LINKS_API_URL, {
-            headers: {
-                'Authorization': `token ${token}`
-            }
+        let resp = await this.fetchData(LABEL_LINKS_API_URL);
+        this.setState({
+            song_labels:resp.results
         })
-        .then((response) =>{
-            //用到this需要注意指向，箭头函数
-            this.setState({
-                song_labels:response.data.results
-            })
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
     }
     async queryByLabels() {
         console.log("queryByLabels")

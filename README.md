@@ -10,7 +10,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 ### 安装
 > * ```shell
 >   # 启动 Label Studio 容器
->   docker run --rm -p 8080:8080 -v `pwd`/hymns_picker:/label-studio/hymns_picker --name label-studio heartexlabs/label-studio:latest
+>   docker run -it -d -p 8080:8080 -v $(pwd)/hymns-picker-data:/label-studio/data --name label-studio heartexlabs/label-studio:latest
 >   ```
 > * 在 Label Studio 界面上注册并新建项目
 > * 拷贝 Label Studio 中的 token 并设置其为本地环境变量 REACT_APP_HYMNS_PICKER_TOKEN
@@ -29,7 +29,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ### 注意事项
 > * 当前本项目中的资源仅适用浸信会诗歌的挑选
-> * 鉴于 Label Studio API 的有限性，本项目通过遍历来查找目标，故有性能问题，且随着关键词增多而更明显。
+> * 鉴于 Label Studio API 的有限性且没有为之接入任何后端来处理标签数据，本项目通过遍历来查找目标，故有性能问题，且随着关键词增多而更明显。
 
 ### 一些脚本
 #### `npm start`
