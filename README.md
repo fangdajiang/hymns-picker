@@ -30,12 +30,13 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 ### 运行
 > * 同时启动后端（Label Studio）和前端（本项目）
 > ```shell
-> REACT_APP_HYMNS_PICKER_TOKEN=123456 docker-compose up -d
+> REACT_APP_HYMNS_PICKER_TOKEN=123456 REACT_APP_LABEL_STUDIO_DOMAIN=https://your-domain docker-compose up -d
 > ```
 > * 分别启动
 > ```shell
 > docker run -it -d -p 8080:8080 -v $(pwd)/hymns-picker-data:/label-studio/data --name label-studio heartexlabs/label-studio:latest
 > export REACT_APP_HYMNS_PICKER_TOKEN=123456
+> export REACT_APP_LABEL_STUDIO_DOMAIN=https://your-domain
 > npm start
 > ```
 

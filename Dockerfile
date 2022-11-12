@@ -3,8 +3,6 @@ FROM nginx
 MAINTAINER "fangdajiang@gmail.com"
 LABEL description="Hymns Picker Frontend"
 
-ENV REACT_APP_HYMNS_PICKER_TOKEN ${REACT_APP_HYMNS_PICKER_TOKEN}
-
 ENV LANG     en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 ENV LC_ALL   en_US.UTF-8

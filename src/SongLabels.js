@@ -1,11 +1,12 @@
 import React from 'react';
 import {MContext} from "./index";
 
-const PROJECT_API_URL = 'http://localhost:8080/api/dm/project';
-const LABEL_LINKS_API_URL = 'http://localhost:8080/api/label_links?project=1&expand=label';
-const ANNOTATED_TASKS_API_URL = 'http://localhost:8080/api/tasks?view=';
-const TASK_API_PREFIX_URL = 'http://localhost:8080/api/tasks/';
-const VIEWS_API_URL = 'http://localhost:8080/api/dm/views';
+const LABEL_STUDIO_DOMAIN = process.env.REACT_APP_LABEL_STUDIO_DOMAIN
+const PROJECT_API_URL = {LABEL_STUDIO_DOMAIN} + '/api/dm/project';
+const LABEL_LINKS_API_URL = {LABEL_STUDIO_DOMAIN} + '/api/label_links?project=1&expand=label';
+const ANNOTATED_TASKS_API_URL = {LABEL_STUDIO_DOMAIN} + '/api/tasks?view=';
+const TASK_API_PREFIX_URL = {LABEL_STUDIO_DOMAIN} + '/api/tasks/';
+const VIEWS_API_URL = {LABEL_STUDIO_DOMAIN} + '/api/dm/views';
 
 const NOT_AVAILABLE = "(请稍等)"
 

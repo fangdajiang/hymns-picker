@@ -4,9 +4,10 @@ services:
     container_name: hymns-picker-frontend
     image: hymns-picker
     ports:
-      - "80:80"
+      - "8081:80"
     environment:
       - REACT_APP_HYMNS_PICKER_TOKEN=${REACT_APP_HYMNS_PICKER_TOKEN}
+      - REACT_APP_LABEL_STUDIO_DOMAIN=${REACT_APP_LABEL_STUDIO_DOMAIN}
     restart: always
     depends_on:
       - label-studio
