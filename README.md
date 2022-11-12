@@ -5,24 +5,39 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 ### 介绍
 通过对诗歌关键词的挑选，找出诗歌敬拜中想要的歌曲。
 > * 后端：[Label Studio](https://github.com/heartexlabs/label-studio)
-> * 前端：React
+> * 前端：NodeJS, React
 
-### 安装
-> * ```shell
->   # 启动 Label Studio 容器
->   docker run -it -d -p 8080:8080 -v $(pwd)/hymns-picker-data:/label-studio/data --name label-studio heartexlabs/label-studio:latest
->   ```
+### 构建
+> * 通过 Docker 构建
+> ```shell
+> docker build -t hymns-picker:latest -f ./Dockerfile .
+> ```
+
+### 初始化
+> * 启动 Label Studio
+> ```shell
+> docker run -it -d -p 8080:8080 -v $(pwd)/hymns-picker-data:/label-studio/data --name label-studio heartexlabs/label-studio:latest
+> ```
 > * 在 Label Studio 界面上注册并新建项目
-> * 拷贝 Label Studio 中的 token 并设置其为本地环境变量 REACT_APP_HYMNS_PICKER_TOKEN
-> * ```shell
->   export REACT_APP_HYMNS_PICKER_TOKEN=123456
->   ```
-> * ```shell
->   # 导入诗歌标签等数据
->   curl -H "Content-Type: application/json" -H "Authorization: Token 123456" -X PATCH -d @./dep/basic_labels.json http://localhost:8080/api/projects/1 -v
->   curl -H "Content-Type: application/json" -H "Authorization: Token 123456" -X POST -d @./dep/new_labels.json http://localhost:8080/api/labels -v
->   curl -H 'Authorization: Token 123456' -X POST 'http://localhost:8080/api/projects/1/import' -F 'file=@./dep/song_names.csv'
->   ```
+> * 拷贝 token
+> * 导入诗歌标签等数据
+> ```shell
+> curl -H "Content-Type: application/json" -H "Authorization: Token 123456" -X PATCH -d @./dep/basic_labels.json http://localhost:8080/api/projects/1 -v
+> curl -H "Content-Type: application/json" -H "Authorization: Token 123456" -X POST -d @./dep/new_labels.json http://localhost:8080/api/labels -v
+> curl -H 'Authorization: Token 123456' -X POST 'http://localhost:8080/api/projects/1/import' -F 'file=@./dep/song_names.csv'
+> ```
+
+### 运行
+> * 同时启动后端（Label Studio）和前端（本项目）
+> ```shell
+> REACT_APP_HYMNS_PICKER_TOKEN=123456 docker-compose up -d
+> ```
+> * 分别启动
+> ```shell
+> docker run -it -d -p 8080:8080 -v $(pwd)/hymns-picker-data:/label-studio/data --name label-studio heartexlabs/label-studio:latest
+> export REACT_APP_HYMNS_PICKER_TOKEN=123456
+> npm start
+> ```
 
 ### 目标
 > * 1 ~ 3 分钟内找出诗歌

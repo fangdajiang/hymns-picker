@@ -1,0 +1,21 @@
+version: '3'
+services:
+  web:
+    container_name: hymns-picker-frontend
+    image: hymns-picker
+    ports:
+      - "80:80"
+    environment:
+      - REACT_APP_HYMNS_PICKER_TOKEN=${REACT_APP_HYMNS_PICKER_TOKEN}
+    restart: always
+    depends_on:
+      - label-studio
+  label-studio:
+    container_name: label-studio-backend
+    image: heartexlabs/label-studio
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./hymns-picker-data:/label-studio/data
+    restart: unless-stopped
+
