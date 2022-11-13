@@ -9,8 +9,8 @@ const TOKEN = process.env.REACT_APP_HYMNS_PICKER_TOKEN
 
 class Index extends React.Component {
     //构造函数
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         //react定义数据
         this.state = {
             token:toString()

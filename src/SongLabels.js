@@ -1,12 +1,11 @@
 import React from 'react';
 import {MContext} from "./index";
 
-const LABEL_STUDIO_DOMAIN = process.env.REACT_APP_LABEL_STUDIO_DOMAIN
-const PROJECT_API_URL = {LABEL_STUDIO_DOMAIN} + '/api/dm/project';
-const LABEL_LINKS_API_URL = {LABEL_STUDIO_DOMAIN} + '/api/label_links?project=1&expand=label';
-const ANNOTATED_TASKS_API_URL = {LABEL_STUDIO_DOMAIN} + '/api/tasks?view=';
-const TASK_API_PREFIX_URL = {LABEL_STUDIO_DOMAIN} + '/api/tasks/';
-const VIEWS_API_URL = {LABEL_STUDIO_DOMAIN} + '/api/dm/views';
+const PROJECT_API_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/dm/project';
+const LABEL_LINKS_API_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/label_links?project=1&expand=label';
+const ANNOTATED_TASKS_API_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/tasks?view=';
+const TASK_API_PREFIX_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/tasks/';
+const VIEWS_API_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/dm/views';
 
 const NOT_AVAILABLE = "(请稍等)"
 
@@ -22,8 +21,8 @@ class SongLabels extends React.Component {
     }
     annotatedSongs = [this.AnnotatedSong];
     //构造函数
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         //react定义数据
         this.state = {
             total_tasks_count:0,
@@ -71,7 +70,7 @@ class SongLabels extends React.Component {
                 if (label.trim() !== "" && annotations.includes(", " + label)) { //simplified logic
                     console.log("Found label '" + label + "' in task '" + taskIds[taskIdsKey] + "/" + resp.data.text + "'.")
                     selectedLabels = selectedLabels.replace(label + ",", "")
-                    console.log("selectedLabels2:'" + selectedLabels + "'")
+                    console.log("selectedLabels:'" + selectedLabels + "'")
                 }
             })
             console.log("selectedLabels3:'" + selectedLabels + "'")

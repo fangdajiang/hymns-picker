@@ -7,7 +7,7 @@ class SongPicture extends Component {
         super(props);
         this.state = {
             alt:"诗歌谱",
-            url:"http://localhost:8080/static/icons/logo-black.svg"
+            url:process.env.REACT_APP_LABEL_STUDIO_DOMAIN + "/static/icons/logo-black.svg"
         }
     }
     render() {

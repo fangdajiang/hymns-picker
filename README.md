@@ -11,6 +11,10 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 > * 通过 Docker 构建
 > ```shell
 > docker build -t hymns-picker:latest -f ./Dockerfile .
+> * 通过源码构建
+> export REACT_APP_HYMNS_PICKER_TOKEN=123456
+> export REACT_APP_LABEL_STUDIO_DOMAIN=https://your-domain
+> `npm run build`
 > ```
 
 ### 初始化
@@ -30,7 +34,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 ### 运行
 > * 同时启动后端（Label Studio）和前端（本项目）
 > ```shell
-> REACT_APP_HYMNS_PICKER_TOKEN=123456 REACT_APP_LABEL_STUDIO_DOMAIN=https://your-domain docker-compose up -d
+> docker-compose up -d
 > ```
 > * 分别启动
 > ```shell
@@ -47,10 +51,4 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 > * 当前本项目中的资源仅适用浸信会诗歌的挑选
 > * 鉴于 Label Studio API 的有限性且没有为之接入任何后端来处理标签数据，本项目通过遍历来查找目标，故有性能问题，且随着关键词增多而更明显。
 
-### 一些脚本
-#### `npm start`
-
-#### `npm test`
-
-#### `npm run build`
 
