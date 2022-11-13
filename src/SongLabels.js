@@ -8,6 +8,7 @@ const TASK_API_PREFIX_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/ta
 const VIEWS_API_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/dm/views';
 
 const NOT_AVAILABLE = "(请稍等)"
+const INVALID_CONDITIONS = "(请改变过滤条件)"
 
 let token = ""
 export function convertUnicode(input) {
@@ -30,7 +31,7 @@ class SongLabels extends React.Component {
             basic_labels:[],
             song_labels:[],
             selected_labels:"",
-            query_result_song_names:"(请改变过滤条件)"
+            query_result_song_names: {INVALID_CONDITIONS}
         }
     }
     //请求接口的方法
@@ -129,6 +130,9 @@ class SongLabels extends React.Component {
                     console.log("tasks count:" + res.length)
                     this.getTasks(res).then((resp) => {
                         console.log("resp:'" + resp + "'")
+                        if (resp.trim().length === 0) {
+                            resp = INVALID_CONDITIONS
+                        }
                         this.setState({
                             query_result_song_names: resp
                         })
