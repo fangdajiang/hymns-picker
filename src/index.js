@@ -31,7 +31,7 @@ class Index extends React.Component {
                         </thead>
                         <tbody>
                         <tr>
-                            <td>过滤</td>
+                            <td>过滤标签<br/>（多选按 ⌘ (Win:Ctrl）</td>
                             <td>诗歌列表</td>
                             <td>谱/歌词/相关经文/作者</td>
                         </tr>

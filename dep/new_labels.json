@@ -532,6 +532,28 @@
     "organization": 1,
     "project": 1,
     "from_name": "taxonomy",
+    "value": ["教会/宗教改革","爱人如己彼此相爱"],
+    "title": "taxonomy:[\"教会/宗教改革\",\"爱人如己彼此相爱\"]",
+    "description": null,
+    "approved": true,
+    "approved_by": null
+  },
+  {
+    "created_by": 1,
+    "organization": 1,
+    "project": 1,
+    "from_name": "taxonomy",
+    "value": ["教会/宗教改革","服事"],
+    "title": "taxonomy:[\"教会/宗教改革\",\"服事\"]",
+    "description": null,
+    "approved": true,
+    "approved_by": null
+  },
+  {
+    "created_by": 1,
+    "organization": 1,
+    "project": 1,
+    "from_name": "taxonomy",
     "value": ["关键词","信心"],
     "title": "taxonomy:[\"关键词\",\"信心\"]",
     "description": null,
@@ -589,6 +611,17 @@
     "from_name": "taxonomy",
     "value": ["关键词","有福"],
     "title": "taxonomy:[\"关键词\",\"有福\"]",
+    "description": null,
+    "approved": true,
+    "approved_by": null
+  },
+  {
+    "created_by": 1,
+    "organization": 1,
+    "project": 1,
+    "from_name": "taxonomy",
+    "value": ["关键词","祷告"],
+    "title": "taxonomy:[\"关键词\",\"祷告\"]",
     "description": null,
     "approved": true,
     "approved_by": null

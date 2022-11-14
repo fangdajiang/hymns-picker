@@ -28,6 +28,7 @@ class SongLabels extends React.Component {
         this.state = {
             total_tasks_count:0,
             annotated_tasks_count:0,
+            basic_labels_children_count:[],
             basic_labels:[],
             song_labels:[],
             selected_labels:"",
@@ -148,6 +149,21 @@ class SongLabels extends React.Component {
         }
         this.state.query_result_song_names = songNames
     };
+    setBasicLabelsCount() {
+        console.log("setBasicLabelsCount")
+        if (document.getElementById("bl0") !== null) {
+            if (this.state.basic_labels_children_count[this.state.basic_labels.length - 1] > 0) {
+                for (let i = 0; i < this.state.basic_labels.length; i++) {
+                    let optGroupLabel = document.getElementById("bl" + i).getAttribute("label")
+                    document.getElementById("bl" + i).setAttribute("label", optGroupLabel + "/" + this.state.basic_labels_children_count[i])
+                }
+            } else {
+                console.log("the last of basic labels count is 0")
+            }
+        } else {
+            console.log("bl0 NOT FOUND")
+        }
+    }
 
     change=(event)=> {
         let labelArray = Array.from(event.target.selectedOptions, option => option.value);
@@ -161,30 +177,36 @@ class SongLabels extends React.Component {
     }
     componentDidMount() {
         token = this.props.token
-        this.getBasicLabels()
-        this.getSongLabels()
+        this.getBasicLabels().then()
+        this.getSongLabels().then()
     }
     render() {
         console.log("rendering SongLabels")
         let i = 0
+        let basicLabelsChildrenCount = 0;
         return (
             <div>
                 <div>
                 <select name="keyLabels" multiple size={this.state.basic_labels.length + this.state.song_labels.length} onChange={this.change}>
                     {
                         this.state.basic_labels.map((value,key)=>{
-                            return<optgroup key={key} id={key} label={value}>
+                            basicLabelsChildrenCount = 0
+                            let result = <optgroup key={key} id={"bl" + key} label={value}>
                                     {
                                         this.state.song_labels.map((songName,songNameKey)=>{
+                                            let optionString = ""
                                             if (value === songName.label.value[0]) {
+                                                basicLabelsChildrenCount ++
                                                 this.annotatedSongs[i++] = this.AnnotatedSong(songName.label.value[1], songName.annotations_count)
-                                                return<option key={songNameKey} value={songName.label.value[1]}>{songName.label.value[1]}/{songName.annotations_count}</option>
-                                            } else {
-                                                return ""
+                                                optionString = <option key={songNameKey} value={songName.label.value[1]}>{songName.label.value[1]}/{songName.annotations_count}</option>;
                                             }
+                                            return optionString
                                         })
                                     }
                                 </optgroup>
+                            this.state.basic_labels_children_count[key] = basicLabelsChildrenCount
+                            this.setBasicLabelsCount()
+                            return result
                         })
                     }
                 </select>
