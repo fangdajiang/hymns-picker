@@ -32,6 +32,7 @@ class SongLabels extends React.Component {
             basic_labels:[],
             song_labels:[],
             selected_labels:"",
+            labels_loaded:false,
             query_result_song_names: {INVALID_CONDITIONS}
         }
     }
@@ -150,18 +151,13 @@ class SongLabels extends React.Component {
         this.state.query_result_song_names = songNames
     };
     setBasicLabelsCount() {
-        console.log("setBasicLabelsCount")
-        if (document.getElementById("bl0") !== null) {
-            if (this.state.basic_labels_children_count[this.state.basic_labels.length - 1] > 0) {
-                for (let i = 0; i < this.state.basic_labels.length; i++) {
-                    let optGroupLabel = document.getElementById("bl" + i).getAttribute("label")
-                    document.getElementById("bl" + i).setAttribute("label", optGroupLabel + "/" + this.state.basic_labels_children_count[i])
-                }
-            } else {
-                console.log("the last of basic labels count is 0")
+        if (!this.state.labels_loaded) {
+            console.log("setBasicLabelsCount")
+            for (let i = 0; i < this.state.basic_labels.length; i++) {
+                let optGroupLabel = document.getElementById("bl" + i).getAttribute("label")
+                document.getElementById("bl" + i).setAttribute("label", optGroupLabel + "/" + this.state.basic_labels_children_count[i])
             }
-        } else {
-            console.log("bl0 NOT FOUND")
+            this.state.labels_loaded = true
         }
     }
 
@@ -205,7 +201,9 @@ class SongLabels extends React.Component {
                                     }
                                 </optgroup>
                             this.state.basic_labels_children_count[key] = basicLabelsChildrenCount
-                            this.setBasicLabelsCount()
+                            if (this.state.basic_labels.length === (key + 1) && basicLabelsChildrenCount > 0) {
+                                this.setBasicLabelsCount()
+                            }
                             return result
                         })
                     }
