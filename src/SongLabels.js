@@ -3,7 +3,7 @@ import {MContext} from "./index";
 
 const PROJECT_API_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/dm/project';
 const LABEL_LINKS_API_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/label_links?project=1&expand=label';
-const ANNOTATED_TASKS_API_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/tasks?view=';
+const ANNOTATED_TASKS_API_PREFIX_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/tasks?view=';
 const TASK_API_PREFIX_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/tasks/';
 const VIEWS_API_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/dm/views';
 
@@ -54,8 +54,8 @@ class SongLabels extends React.Component {
         let taskIds = []
         let viewId = viewsResp[0].id
         console.log("view id: " + viewId)
-        console.log("fetching: " + ANNOTATED_TASKS_API_URL + viewId)
-        let resp = await this.fetchData(ANNOTATED_TASKS_API_URL + viewId);
+        console.log("fetching: " + ANNOTATED_TASKS_API_PREFIX_URL + viewId)
+        let resp = await this.fetchData(ANNOTATED_TASKS_API_PREFIX_URL + viewId);
         resp.tasks.forEach((task,taskKey)=>{
             taskIds[taskKey] = task.id
         })
@@ -91,7 +91,7 @@ class SongLabels extends React.Component {
         console.log(resp.parsed_label_config.taxonomy.labels);
         this.setState({
             total_tasks_count:resp.task_count,
-            annotated_tasks_count:resp.annotation_count, //may not accurate, will be overridden by 'total' from ANNOTATED_TASKS_API_URL
+            annotated_tasks_count:resp.annotation_count, //may not accurate, will be overridden by 'total' from ANNOTATED_TASKS_API_PREFIX_URL
             basic_labels:resp.parsed_label_config.taxonomy.labels,
         })
     }
