@@ -3,18 +3,14 @@ import {MContext} from "./index";
 
 const PROJECT_API_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/dm/project';
 const LABEL_LINKS_API_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/label_links?project=1&expand=label';
-const ANNOTATED_TASKS_API_PREFIX_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/tasks?view=';
-const TASK_API_PREFIX_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/tasks/';
-const VIEWS_API_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/dm/views';
+const TASK_API_PREFIX_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + "/songs?";
 
 const NOT_AVAILABLE = "(请稍等)"
 const INVALID_CONDITIONS = "(请改变过滤条件)"
+const ZERO_RESULTS = "(无结果)"
+const INVALID_BACKEND = "(搜索库故障)"
 
 let token = ""
-export function convertUnicode(input) {
-    return input.replace(/\\+u([0-9a-fA-F]{4})/g, (a,b) =>
-        String.fromCharCode(parseInt(b, 16)));
-}
 
 class SongLabels extends React.Component {
     AnnotatedSong = (annotatedLabel, annotationsCount) => {
@@ -31,7 +27,7 @@ class SongLabels extends React.Component {
             basic_labels_children_count:[],
             basic_labels:[],
             song_labels:[],
-            selected_labels:"",
+            selected_labels:[],
             labels_loaded:false,
             query_result_song_names: {INVALID_CONDITIONS}
         }
@@ -49,37 +45,27 @@ class SongLabels extends React.Component {
             console.log(error);
         });
     }
-    async getAnnotatedTasks() {
-        let viewsResp = await this.fetchData(VIEWS_API_URL);
-        let taskIds = []
-        let viewId = viewsResp[0].id
-        console.log("view id: " + viewId)
-        console.log("fetching: " + ANNOTATED_TASKS_API_PREFIX_URL + viewId)
-        let resp = await this.fetchData(ANNOTATED_TASKS_API_PREFIX_URL + viewId);
-        resp.tasks.forEach((task,taskKey)=>{
-            taskIds[taskKey] = task.id
-        })
-        return taskIds;
-    }
-    async getTasks(taskIds) {
+    async getTasks() {
         let songNames = ""
-        for (let taskIdsKey in taskIds) {
-            let selectedLabels = this.state.selected_labels
-            console.log("selectedLabels1:'" + selectedLabels + "'")
-            let resp = await this.fetchData(TASK_API_PREFIX_URL + taskIds[taskIdsKey]);
-            let annotations = convertUnicode(resp.annotations_results)
-            console.log("task '" + taskIds[taskIdsKey] + "/" + resp.data.text + "', query_result_song_names:'" + this.state.query_result_song_names + "', annotations_results:" + annotations)
-            this.state.selected_labels.split(',').forEach((label) => {
-                if (label.trim() !== "" && annotations.includes(", " + label)) { //simplified logic
-                    console.log("Found label '" + label + "' in task '" + taskIds[taskIdsKey] + "/" + resp.data.text + "'.")
-                    selectedLabels = selectedLabels.replace(label + ",", "")
-                    console.log("selectedLabels:'" + selectedLabels + "'")
-                }
-            })
-            console.log("selectedLabels3:'" + selectedLabels + "'")
-            if (selectedLabels === "") {
-                songNames += resp.data.text + ","
+        let selectedLabelsArray = this.state.selected_labels
+        console.log("selectedLabelsArray:'" + selectedLabelsArray + "'")
+        if (selectedLabelsArray.length > 0) {
+            let selectedLabelsAsQueryString = ""
+            for (let index in selectedLabelsArray) {
+                selectedLabelsAsQueryString += "label=" + selectedLabelsArray[index] + "&"
             }
+            let resp = await this.fetchData(TASK_API_PREFIX_URL + selectedLabelsAsQueryString);
+            console.log("resp2:'" + resp + "'")
+            if (undefined !== resp) {
+                for (let i in resp) {
+                    console.log("song name:'" + resp[i].nameCn + "'")
+                    songNames += resp[i].nameCn + ","
+                }
+            } else {
+                songNames = INVALID_BACKEND
+            }
+        } else {
+            songNames = INVALID_CONDITIONS
         }
         return songNames
     }
@@ -110,13 +96,13 @@ class SongLabels extends React.Component {
         function findZeroAnnotatedSong(annotatedSongs, selectedLabels) {
             let labelWithZeroAnnotations = ""
             for (let annotatedSongsKey in annotatedSongs) {
-                selectedLabels.split(',').forEach((label) => {
-                    if (annotatedSongs[annotatedSongsKey].annotatedLabel === label &&
+                for (let selectedLabelsKey in selectedLabels) {
+                    if (annotatedSongs[annotatedSongsKey].annotatedLabel === selectedLabels[selectedLabelsKey] &&
                         annotatedSongs[annotatedSongsKey].annotationsCount === 0) {
-                        console.log("Found selected label with 0 annotations count:" + label)
-                        labelWithZeroAnnotations = label
+                        console.log("Found selected label with 0 annotations count:" + selectedLabels[selectedLabelsKey])
+                        labelWithZeroAnnotations = selectedLabels[selectedLabelsKey]
                     }
-                })
+                }
                 if (labelWithZeroAnnotations !== "") {
                     break
                 }
@@ -125,23 +111,20 @@ class SongLabels extends React.Component {
         }
 
         let zeroAnnotatedSong = findZeroAnnotatedSong(this.annotatedSongs, this.state.selected_labels);
-        console.log("zeroAnnotatedSong:" + zeroAnnotatedSong)
-        if (zeroAnnotatedSong === "") {
-            if (this.state.selected_labels.trim().length > 0) {
-                this.getAnnotatedTasks().then((res) => {
-                    console.log("tasks count:" + res.length)
-                    this.getTasks(res).then((resp) => {
-                        console.log("resp:'" + resp + "'")
-                        if (resp.trim().length === 0) {
-                            resp = INVALID_CONDITIONS
-                        }
-                        this.setState({
-                            query_result_song_names: resp
-                        })
-                        // this.state.query_result_song_names = resp
+        console.log("zeroAnnotatedSong:'" + zeroAnnotatedSong + "'")
+        if (zeroAnnotatedSong.trim().length === 0) {
+            if (this.state.selected_labels.length > 0) {
+                this.getTasks().then((resp) => {
+                    console.log("resp:'" + resp + "'")
+                    if (resp.trim().length === 0) {
+                        resp = ZERO_RESULTS
+                    }
+                    this.setState({
+                        query_result_song_names: resp
                     })
-                    console.log("getTasks done")
+                    // this.state.query_result_song_names = resp
                 })
+                console.log("getTasks done")
             } else {
                 songNames = "(0 words selected.)"
             }
@@ -164,11 +147,7 @@ class SongLabels extends React.Component {
     change=(event)=> {
         let labelArray = Array.from(event.target.selectedOptions, option => option.value);
         console.log("selected labels changed:" + labelArray)
-        let labels = ""
-        for (let i = 0; i < labelArray.length; i++) {
-            labels += labelArray[i] + ","
-        }
-        this.state.selected_labels = labels
+        this.state.selected_labels = labelArray
         this.queryByLabels().then()
     }
     componentDidMount() {
@@ -182,6 +161,16 @@ class SongLabels extends React.Component {
         let basicLabelsChildrenCount = 0;
         return (
             <div>
+                <div>诗歌总数：{this.state.total_tasks_count}<br/>已打标签诗歌：{this.state.annotated_tasks_count}</div>
+                <div>
+                    <MContext.Consumer>
+                        {(context) => (
+                            <button onClick={()=>{
+                                context.setMessage(this.state.query_result_song_names)
+                            }}>查 询</button>
+                        )}
+                    </MContext.Consumer>
+                </div>
                 <div>
                 <select name="keyLabels" multiple size={this.state.basic_labels.length + this.state.song_labels.length} onChange={this.change}>
                     {
@@ -208,16 +197,6 @@ class SongLabels extends React.Component {
                         })
                     }
                 </select>
-                </div>
-                <div>诗歌总数：{this.state.total_tasks_count}<br/>已打标签诗歌：{this.state.annotated_tasks_count}</div>
-                <div>
-                    <MContext.Consumer>
-                        {(context) => (
-                            <button onClick={()=>{
-                                context.setMessage(this.state.query_result_song_names)
-                            }}>查 询</button>
-                        )}
-                    </MContext.Consumer>
                 </div>
             </div>
         )
