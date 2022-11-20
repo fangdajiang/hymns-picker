@@ -15,8 +15,6 @@ class SongNames extends Component {
             }
         }
     }
-    componentDidMount() {
-    }
     render() {
         console.log("rendering SongNames")
         return (
@@ -25,7 +23,7 @@ class SongNames extends Component {
                 <MContext.Consumer>
                     {
                         (context) => (
-                            context.state.message.split(',').map((songName, key) => {
+                            this.props.songNames.split(',').map((songName, key) => {
                                 if (songName !== "") {
                                     return <li key={key}>
                                         <a className={styles.songName} href="/#" onClick={()=>{

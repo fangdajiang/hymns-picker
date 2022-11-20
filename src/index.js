@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import styles from './index.module.css';
 import SongLabels from './SongLabels';
-import SongNames from "./SongNames";
 import SongPicture from "./SongPicture";
 
 const TOKEN = process.env.REACT_APP_HYMNS_PICKER_TOKEN
@@ -15,11 +14,11 @@ class Index extends React.Component {
         super(props);
         //react定义数据
         this.state = {
-            elastic_search_total_tasks_count:'?',
-            label_studio_total_tasks_count:'?',
-            elastic_search_annotated_tasks_count:'?',
-            label_studio_annotated_tasks_count:'?',
-            token:toString()
+            elastic_search_total_tasks_count:"?",
+            label_studio_total_tasks_count:"?",
+            elastic_search_annotated_tasks_count:"?",
+            label_studio_annotated_tasks_count:"?",
+            token:""
         }
     }
     componentDidMount() {
@@ -62,8 +61,8 @@ class Index extends React.Component {
                 <div>
                     <table className={styles.tbl}>
                         <caption className={styles.caption}>TLBC 三分钟选歌 <font size = "4">(Alpha)</font>
-                            【诗歌总数：<span title={"标签库诗歌总数：" + this.state.label_studio_total_tasks_count}>{this.state.elastic_search_total_tasks_count}</span>
-                            ，已打标签诗歌：<span title={"标签库已打标签总数：" + this.state.label_studio_annotated_tasks_count}>{this.state.elastic_search_annotated_tasks_count}</span>】
+                            【诗歌总数：<span title={"LS诗歌总数：" + this.state.label_studio_total_tasks_count}>{this.state.elastic_search_total_tasks_count}</span>
+                            ，已打标签诗歌：<span title={"LS已打标签总数：" + this.state.label_studio_annotated_tasks_count}>{this.state.elastic_search_annotated_tasks_count}</span>】
                         </caption>
                         <thead>
                         <tr>
@@ -71,7 +70,7 @@ class Index extends React.Component {
                                 <table className={styles.tbl}>
                                     <tbody>
                                         <tr>
-                                            <td className={styles.tdLabels} rowSpan="2">近期歌目</td>
+                                            <td className={styles.tdReview} rowSpan="2">近期歌目</td>
                                             <td>10月</td>
                                             <td>11月</td>
                                             <td>12月</td>
@@ -95,11 +94,8 @@ class Index extends React.Component {
                             <td>谱/歌词/相关经文/作者</td>
                         </tr>
                         <tr>
-                            <td className={styles.tdLabels}>
+                            <td className={styles.tdLabels} colSpan="2">
                                 <SongLabels token={TOKEN} />
-                            </td>
-                            <td className={styles.tdNames}>
-                                <SongNames token={TOKEN} />
                             </td>
                             <td className={styles.tdPic}>
                                 <SongPicture />
@@ -123,11 +119,6 @@ class MyProvider extends React.Component {
             <MContext.Provider value={
                 {
                     state: this.state,
-                    setMessage: (value) =>
-                        this.setState(
-                            {message: value}
-                        )
-                    ,
                     setImage: (resized, original, txt) =>
                         this.setState(
                             {

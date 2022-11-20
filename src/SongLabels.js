@@ -1,16 +1,15 @@
 import React from 'react';
-import {MContext} from "./index";
+import SongNames from "./SongNames";
+import styles from "./SongLabels.module.css";
 
 const PROJECT_API_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/dm/project';
 const LABEL_LINKS_API_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/label_links?project=1&expand=label';
 const TASK_API_PREFIX_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + "/songs?";
 
 const NOT_AVAILABLE = "(请稍等)"
-const INVALID_CONDITIONS = "(请改变过滤条件)"
+const INVALID_CONDITIONS = "(请修改过滤标签)"
 const ZERO_RESULTS = "(无结果)"
 const INVALID_BACKEND = "(搜索库故障)"
-
-let token = ""
 
 class SongLabels extends React.Component {
     AnnotatedSong = (annotatedLabel, annotationsCount) => {
@@ -27,14 +26,14 @@ class SongLabels extends React.Component {
             song_labels:[],
             selected_labels:[],
             labels_loaded:false,
-            query_result_song_names: {INVALID_CONDITIONS}
+            query_result_song_names: ""
         }
     }
     //请求接口的方法
     async fetchData(url) {
         return fetch(url, {
             headers: {
-                'Authorization': `token ${token}`
+                'Authorization': `token ${this.props.token}`
             },
             method: 'GET'
         })
@@ -53,7 +52,6 @@ class SongLabels extends React.Component {
                 selectedLabelsAsQueryString += "label=" + selectedLabelsArray[index] + "&"
             }
             let resp = await this.fetchData(TASK_API_PREFIX_URL + selectedLabelsAsQueryString);
-            console.log("resp2:'" + resp + "'")
             if (undefined !== resp) {
                 for (let i in resp) {
                     console.log("song name:'" + resp[i].nameCn + "'")
@@ -118,16 +116,20 @@ class SongLabels extends React.Component {
                     this.setState({
                         query_result_song_names: resp
                     })
-                    // this.state.query_result_song_names = resp
                 })
                 console.log("getTasks done")
             } else {
                 songNames = "(0 words selected.)"
+                this.setState({
+                    query_result_song_names: songNames
+                })
             }
         } else {
             songNames = "(selected label '" + zeroAnnotatedSong + "' has not been labeled by any Hymn.)"
+            this.setState({
+                query_result_song_names: songNames
+            })
         }
-        this.state.query_result_song_names = songNames
     };
     setBasicLabelsCount() {
         if (!this.state.labels_loaded) {
@@ -147,7 +149,6 @@ class SongLabels extends React.Component {
         this.queryByLabels().then()
     }
     componentDidMount() {
-        token = this.props.token
         this.getBasicLabels().then()
         this.getSongLabels().then()
     }
@@ -157,42 +158,40 @@ class SongLabels extends React.Component {
         let basicLabelsChildrenCount = 0;
         return (
             <div>
-                <div>
-                    <MContext.Consumer>
-                        {(context) => (
-                            <button onClick={()=>{
-                                context.setMessage(this.state.query_result_song_names)
-                            }}>查 询</button>
-                        )}
-                    </MContext.Consumer>
-                </div>
-                <div>
-                <select name="keyLabels" multiple size={this.state.basic_labels.length + this.state.song_labels.length} onChange={this.change}>
-                    {
-                        this.state.basic_labels.map((value,key)=>{
-                            basicLabelsChildrenCount = 0
-                            let result = <optgroup key={key} id={"bl" + key} label={value}>
-                                    {
-                                        this.state.song_labels.map((songName,songNameKey)=>{
-                                            let optionString = ""
-                                            if (value === songName.label.value[0]) {
-                                                basicLabelsChildrenCount ++
-                                                this.annotatedSongs[i++] = this.AnnotatedSong(songName.label.value[1], songName.annotations_count)
-                                                optionString = <option key={songNameKey} value={songName.label.value[1]}>{songName.label.value[1]}/{songName.annotations_count}</option>;
+                <table className={styles.tbl}>
+                    <tbody>
+                    <tr>
+                        <td className={styles.tdLabels}>
+                            <select name="keyLabels" multiple size={this.state.basic_labels.length + this.state.song_labels.length} onChange={this.change}>
+                                {
+                                    this.state.basic_labels.map((value,key)=>{
+                                        basicLabelsChildrenCount = 0
+                                        let result = <optgroup key={key} id={"bl" + key} label={value}>
+                                            {
+                                                this.state.song_labels.map((songName,songNameKey)=>{
+                                                    let optionString = ""
+                                                    if (value === songName.label.value[0]) {
+                                                        basicLabelsChildrenCount ++
+                                                        this.annotatedSongs[i++] = this.AnnotatedSong(songName.label.value[1], songName.annotations_count)
+                                                        optionString = <option key={songNameKey} value={songName.label.value[1]}>{songName.label.value[1]}/{songName.annotations_count}</option>;
+                                                    }
+                                                    return optionString
+                                                })
                                             }
-                                            return optionString
-                                        })
-                                    }
-                                </optgroup>
-                            this.state.basic_labels_children_count[key] = basicLabelsChildrenCount
-                            if (this.state.basic_labels.length === (key + 1) && basicLabelsChildrenCount > 0) {
-                                this.setBasicLabelsCount()
-                            }
-                            return result
-                        })
-                    }
-                </select>
-                </div>
+                                        </optgroup>
+                                        this.state.basic_labels_children_count[key] = basicLabelsChildrenCount
+                                        if (this.state.basic_labels.length === (key + 1) && basicLabelsChildrenCount > 0) {
+                                            this.setBasicLabelsCount()
+                                        }
+                                        return result
+                                    })
+                                }
+                            </select>
+                        </td>
+                        <td className={styles.tdNames}><SongNames token={this.props.token} songNames={this.state.query_result_song_names} /></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
         )
     }

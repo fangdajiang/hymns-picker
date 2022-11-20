@@ -1,0 +1,19 @@
+
+.tbl {
+  width: 100%;
+  horiz-align: right;
+}
+.tdLabels {
+  width: 30%;
+  border: 1px ridge #cccccc;
+  text-align: left;
+  vertical-align: text-top;
+}
+.tdNames {
+  width: 70%;
+  color: #005ba6;
+  border: 1px ridge #cccccc;
+  text-align: left;
+  vertical-align: top;
+}
+

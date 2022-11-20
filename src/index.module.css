@@ -27,18 +27,17 @@ td {
 }
 
 .tdLabels {
-  width: 15%;
+  width: 40%;
   border: 1px ridge #cccccc;
   text-align: left;
   vertical-align: text-top;
 }
 
-.tdNames {
-  width: 25%;
-  color: #005ba6;
+.tdReview {
+  width: 15%;
   border: 1px ridge #cccccc;
-  text-align: left;
-  vertical-align: top;
+  text-align: center;
+  vertical-align: middle;
 }
 
 .tdPic {
