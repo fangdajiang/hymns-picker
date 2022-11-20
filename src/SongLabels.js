@@ -22,8 +22,6 @@ class SongLabels extends React.Component {
         super(props);
         //react定义数据
         this.state = {
-            total_tasks_count:0,
-            annotated_tasks_count:0,
             basic_labels_children_count:[],
             basic_labels:[],
             song_labels:[],
@@ -76,8 +74,6 @@ class SongLabels extends React.Component {
         let resp = await this.fetchData(PROJECT_API_URL);
         console.log(resp.parsed_label_config.taxonomy.labels);
         this.setState({
-            total_tasks_count:resp.task_count,
-            annotated_tasks_count:resp.annotation_count, //may not accurate, will be overridden by 'total' from ANNOTATED_TASKS_API_PREFIX_URL
             basic_labels:resp.parsed_label_config.taxonomy.labels,
         })
     }
@@ -161,7 +157,6 @@ class SongLabels extends React.Component {
         let basicLabelsChildrenCount = 0;
         return (
             <div>
-                <div>诗歌总数：{this.state.total_tasks_count}<br/>已打标签诗歌：{this.state.annotated_tasks_count}</div>
                 <div>
                     <MContext.Consumer>
                         {(context) => (

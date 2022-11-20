@@ -6,8 +6,8 @@ const SONG_PICTURE_URL_PREFIX = 'https://hymns.oss-cn-shanghai.aliyuncs.com/pics
 const SONG_PICTURE_URL_SUFFIX = '.png?x-oss-process=image/resize,p_15';
 
 class SongNames extends Component {
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             name:"Hello",
             joy:{

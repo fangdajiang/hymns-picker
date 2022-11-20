@@ -17,6 +17,10 @@ td {
   horiz-align: right;
 }
 
+.caption {
+  font-size: 30px;
+}
+
 .tblHead {
   border: 1px ridge #cccccc;
   text-align: center;
