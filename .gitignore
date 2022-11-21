@@ -2,7 +2,6 @@
 
 # IDEA
 /.idea
-/hymns-picker-data
 
 # dependencies
 /node_modules

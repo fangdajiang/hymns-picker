@@ -20,6 +20,8 @@ class SongNames extends Component {
         return (
             <div>
                 <li>{this.state.name} {this.state.joy.coding}</li>
+                <li><input name="searchByName" placeholder="过滤歌名" disabled />
+                </li>
                 <MContext.Consumer>
                     {
                         (context) => (
