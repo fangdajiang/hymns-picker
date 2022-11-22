@@ -4,7 +4,7 @@ services:
     container_name: hp
     image: hymns-picker
     ports:
-      - "8081:8081"
+      - "8081:80"
     restart: always
     depends_on:
       - label-studio
@@ -15,7 +15,7 @@ services:
     ports:
       - "8082:8082"
     environment:
-      ELASTIC_SEARCH_HOST_AND_PORT: ${ELASTIC_SEARCH_HOST_AND_PORT}
+      ELASTIC_SEARCH_HOST_AND_PORT: es:9200
     restart: unless-stopped
     depends_on:
       - es
