@@ -26,7 +26,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ~/IdeaProjects/hymns-data/label-studio-data:/label-studio/data
+      - ~/hymns-data/label-studio-data:/label-studio/data
     restart: unless-stopped
   es:
     container_name: es
@@ -35,19 +35,72 @@ services:
       - "9200:9200"
       - "9300:9300"
     environment:
-      ES_JAVA_OPTS: -Xms512m -Xmx512m
-      discovery.type: single-node
+      - node.name=es01
+      - discovery.seed_hosts=es02
+      - cluster.initial_master_nodes=es01,es02
+      - cluster.name=hymns-cluster
+      - bootstrap.memory_lock="true"
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.enrollment.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - http.cors.enabled=true
+      - http.cors.allow-origin="*"
+#      discovery.type: single-node
     volumes:
-      - ~/IdeaProjects/hymns-data/elasticsearch-data/data:/usr/share/elasticsearch/data
-      - ~/IdeaProjects/hymns-data/elasticsearch-data/plugins:/usr/share/elasticsearch/plugins
-      - ~/IdeaProjects/hymns-data/elasticsearch-data/config:/usr/share/elasticsearch/config
+#      - es-data-es01:/usr/share/elasticsearch/data
+      - ~/hymns-data/elasticsearch-data/data:/usr/share/elasticsearch/data
+      - ~/hymns-data/elasticsearch-data/plugins:/usr/share/elasticsearch/plugins
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    restart: unless-stopped
+  es02:
+    container_name: es02
+    image: elasticsearch:8.4.3
+    ports:
+      - "9201:9200"
+      - "9301:9300"
+    environment:
+      - node.name=es02
+      - discovery.seed_hosts=es01
+      - cluster.initial_master_nodes=es01,es02
+      - cluster.name=hymns-cluster
+      - bootstrap.memory_lock="true"
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.enrollment.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - http.cors.enabled=true
+      - http.cors.allow-origin="*"
+    #      discovery.type: single-node
+    volumes:
+#      - es-data-es02:/usr/share/elasticsearch/data
+      - ~/hymns-data/elasticsearch-data/data:/usr/share/elasticsearch/data
+      - ~/hymns-data/elasticsearch-data/plugins:/usr/share/elasticsearch/plugins
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     restart: unless-stopped
   kibana:
     container_name: kibana
     image: kibana:8.4.3
     ports:
       - "5601:5601"
+    environment:
+      ELASTICSEARCH_URL: http://es:9200
+      ELASTICSEARCH_HOSTS: '["http://es:9200","http://es02:9200"]'
+      SERVER_SSL_ENABLED: "false"
     volumes:
-      - ~/IdeaProjects/hymns-data/kibana-data/config/kibana.yml:/usr/share/kibana/config/kibana.yml
+      - ~/hymns-data/kibana-data/config/kibana.yml:/usr/share/kibana/config/kibana.yml
     restart: unless-stopped
-
+    depends_on:
+      - es
+      - es02
+#volumes:
+#  es-data-es01:
+#  es-data-es02:
