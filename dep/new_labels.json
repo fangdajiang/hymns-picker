@@ -411,8 +411,8 @@
     "organization": 1,
     "project": 1,
     "from_name": "taxonomy",
-    "value": ["礼拜/宗教改革","圣经"],
-    "title": "taxonomy:[\"礼拜/宗教改革\",\"圣经\"]",
+    "value": ["礼拜/宗教改革","圣经经文"],
+    "title": "taxonomy:[\"礼拜/宗教改革\",\"圣经经文\"]",
     "description": null,
     "approved": true,
     "approved_by": null
