@@ -2,8 +2,8 @@ import React from 'react';
 import SongNames from "./SongNames";
 import styles from "./SongLabels.module.css";
 
-const PROJECT_API_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/dm/project';
-const LABEL_LINKS_API_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/label_links?project=1&expand=label';
+const CATEGORY_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/labels/categories';
+const LABELS_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/labels';
 const TASK_API_PREFIX_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + "/songs?";
 
 const NOT_AVAILABLE = "(请稍等)"
@@ -69,18 +69,18 @@ class SongLabels extends React.Component {
     async getBasicLabels() {
         console.log("getting basic labels")
 
-        let resp = await this.fetchData(PROJECT_API_URL);
-        console.log(resp.parsed_label_config.taxonomy.labels);
+        let resp = await this.fetchData(CATEGORY_API_URL);
+        console.log("resp:" + resp);
         this.setState({
-            basic_labels:resp.parsed_label_config.taxonomy.labels,
+            basic_labels:resp,
         })
     }
     async getSongLabels() {
         console.log("getting song labels")
 
-        let resp = await this.fetchData(LABEL_LINKS_API_URL);
+        let resp = await this.fetchData(LABELS_API_URL);
         this.setState({
-            song_labels:resp.results
+            song_labels:resp
         })
     }
     async queryByLabels() {
@@ -170,10 +170,10 @@ class SongLabels extends React.Component {
                                             {
                                                 this.state.song_labels.map((songName,songNameKey)=>{
                                                     let optionString = ""
-                                                    if (value === songName.label.value[0]) {
+                                                    if (value === songName.category) {
                                                         basicLabelsChildrenCount ++
-                                                        this.annotatedSongs[i++] = this.AnnotatedSong(songName.label.value[1], songName.annotations_count)
-                                                        optionString = <option key={songNameKey} value={songName.label.value[1]}>{songName.label.value[1]}/{songName.annotations_count}</option>;
+                                                        this.annotatedSongs[i++] = this.AnnotatedSong(songName.label, 0)
+                                                        optionString = <option key={songNameKey} value={songName.label}>{songName.label}/0</option>;
                                                     }
                                                     return optionString
                                                 })

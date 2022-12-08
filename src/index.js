@@ -6,7 +6,7 @@ import SongPicture from "./SongPicture";
 
 const TOKEN = process.env.REACT_APP_HYMNS_PICKER_TOKEN
 const ELASTIC_SEARCH_SUMMARY_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/songs/summary';
-const PROJECT_API_URL = process.env.REACT_APP_LABEL_STUDIO_DOMAIN + '/api/dm/project';
+const SONG_SUMMARY_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/songs/summary';
 
 class Index extends React.Component {
     //构造函数
@@ -15,15 +15,15 @@ class Index extends React.Component {
         //react定义数据
         this.state = {
             elastic_search_total_tasks_count:"?",
-            label_studio_total_tasks_count:"?",
+            song_summary_total_number:"?",
             elastic_search_annotated_tasks_count:"?",
-            label_studio_annotated_tasks_count:"?",
+            song_summary_annotation_count:"?",
             token:""
         }
     }
     componentDidMount() {
         this.getElasticSearchSummary().then();
-        this.getLabelStudioSummary().then();
+        this.getSongSummary().then();
     }
     async fetchData(url) {
         return fetch(url, {
@@ -46,13 +46,13 @@ class Index extends React.Component {
             elastic_search_annotated_tasks_count:resp.annotationCount,
         })
     }
-    async getLabelStudioSummary() {
-        console.log("getting label studio summary")
-        let resp = await this.fetchData(PROJECT_API_URL);
-        console.log("label studio total number: " + resp.task_count + ", label studio annotation count: " + resp.annotation_count);
+    async getSongSummary() {
+        console.log("getting song summary")
+        let resp = await this.fetchData(SONG_SUMMARY_API_URL);
+        console.log("song summary total number: " + resp.totalNumber + ", song summary annotation count: " + resp.annotationCount);
         this.setState({
-            label_studio_total_tasks_count:resp.task_count,
-            label_studio_annotated_tasks_count:resp.annotation_count, //may not accurate
+            song_summary_total_number:resp.totalNumber,
+            song_summary_annotation_count:resp.annotationCount,
         })
     }
     render() {
@@ -61,8 +61,8 @@ class Index extends React.Component {
                 <div>
                     <table className={styles.tbl}>
                         <caption className={styles.caption}>TLBC 三分钟选歌 <font size = "4">(Alpha)</font>
-                            【诗歌总数：<span title={"LS诗歌总数：" + this.state.label_studio_total_tasks_count}>{this.state.elastic_search_total_tasks_count}</span>
-                            ，已打标签诗歌：<span title={"LS已打标签总数：" + this.state.label_studio_annotated_tasks_count}>{this.state.elastic_search_annotated_tasks_count}</span>】
+                            【诗歌总数：<span title={"LS诗歌总数：" + this.state.song_summary_total_number}>{this.state.elastic_search_total_tasks_count}</span>
+                            ，已打标签诗歌：<span title={"LS已打标签总数：" + this.state.song_summary_annotation_count}>{this.state.elastic_search_annotated_tasks_count}</span>】
                         </caption>
                         <thead>
                         <tr>
