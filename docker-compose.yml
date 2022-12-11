@@ -38,7 +38,7 @@ services:
       - "5601:5601"
     environment:
       ELASTICSEARCH_URL: http://es:9200
-      ELASTICSEARCH_HOSTS: '["http://es:9200","http://es02:9200"]'
+      ELASTICSEARCH_HOSTS: '["http://es:9200"]'
       SERVER_SSL_ENABLED: "false"
     volumes:
       - ~/hymns-data/kibana-data/config/kibana.yml:/usr/share/kibana/config/kibana.yml
