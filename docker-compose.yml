@@ -2,7 +2,7 @@ version: '3'
 services:
   picker:
     container_name: hp
-    image: hymns-picker
+    image: hymns-picker:0.3.0
     ports:
       - "8081:80"
     restart: always
