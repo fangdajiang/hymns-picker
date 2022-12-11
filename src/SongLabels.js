@@ -162,18 +162,18 @@ class SongLabels extends React.Component {
                     <tbody>
                     <tr>
                         <td className={styles.tdLabels}>
-                            <select name="keyLabels" multiple size={this.state.basic_labels.length + this.state.song_labels.length} onChange={this.change}>
+                            <select name="keyLabels" multiple size={40} onChange={this.change}>
                                 {
                                     this.state.basic_labels.map((value,key)=>{
                                         basicLabelsChildrenCount = 0
                                         let result = <optgroup key={key} id={"bl" + key} label={value}>
                                             {
-                                                this.state.song_labels.map((songName,songNameKey)=>{
+                                                this.state.song_labels.map((categoryLabel,categoryLabelKey)=>{
                                                     let optionString = ""
-                                                    if (value === songName.category) {
+                                                    if (value === categoryLabel.category) {
                                                         basicLabelsChildrenCount ++
-                                                        this.annotatedSongs[i++] = this.AnnotatedSong(songName.label, 0)
-                                                        optionString = <option key={songNameKey} value={songName.label}>{songName.label}/0</option>;
+                                                        this.annotatedSongs[i++] = this.AnnotatedSong(categoryLabel.label, categoryLabel.labelAnnotatedCount)
+                                                        optionString = <option key={categoryLabelKey} value={categoryLabel.label}>{categoryLabel.label}/{categoryLabel.labelAnnotatedCount}</option>;
                                                     }
                                                     return optionString
                                                 })

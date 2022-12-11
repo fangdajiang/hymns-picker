@@ -7,7 +7,7 @@ class SongPicture extends Component {
         super(props);
         this.state = {
             alt:"诗歌谱",
-            url:process.env.REACT_APP_LABEL_STUDIO_DOMAIN + "/static/icons/logo-black.svg"
+            url:"https://cdn.v2ex.com/gravatar/58281e9a97a352b24be21e04f5d228e2?s=73&d=retro"
         }
     }
     render() {
