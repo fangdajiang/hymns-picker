@@ -10,10 +10,15 @@
   vertical-align: text-top;
 }
 .tdNames {
-  width: 70%;
+  width: 30%;
   color: #005ba6;
   border: 1px ridge #cccccc;
   text-align: left;
   vertical-align: top;
 }
-
+.tdPic {
+  width: 40%;
+  border: 1px ridge #cccccc;
+  text-align: left;
+  vertical-align: top;
+}

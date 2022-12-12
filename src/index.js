@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import styles from './index.module.css';
 import SongLabels from './SongLabels';
-import SongPicture from "./SongPicture";
 
 const TOKEN = process.env.REACT_APP_HYMNS_PICKER_TOKEN
 const ELASTIC_SEARCH_SUMMARY_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/songs/summary';
@@ -89,16 +88,8 @@ class Index extends React.Component {
                         </thead>
                         <tbody>
                         <tr>
-                            <td>过滤标签<br/>（多选按 ⌘ (Win:Ctrl）</td>
-                            <td>诗歌列表</td>
-                            <td>谱/歌词/相关经文/作者</td>
-                        </tr>
-                        <tr>
-                            <td className={styles.tdLabels} colSpan="2">
+                            <td className={styles.tdLabels} colSpan="3">
                                 <SongLabels token={TOKEN} />
-                            </td>
-                            <td className={styles.tdPic}>
-                                <SongPicture />
                             </td>
                         </tr>
                         </tbody>

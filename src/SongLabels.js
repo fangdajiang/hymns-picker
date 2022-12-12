@@ -1,6 +1,7 @@
 import React from 'react';
 import SongNames from "./SongNames";
 import styles from "./SongLabels.module.css";
+import SongPicture from "./SongPicture";
 
 const CATEGORY_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/labels/categories';
 const LABELS_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/labels';
@@ -142,6 +143,18 @@ class SongLabels extends React.Component {
         }
     }
 
+    changeLabel=(event)=> {
+        let labelArray = event.target.value;
+        console.log("input label:" + labelArray)
+        console.log("basic_labels:" + this.state.basic_labels)
+        this.state.song_labels.map((categoryLabel,categoryLabelKey)=>{
+            console.log("category:" + categoryLabel.category + ", label:" + categoryLabel.label + ", categoryLabelKey:" + categoryLabelKey)
+        })
+        document.getElementById("hymnLabels").style.visibility = "hidden"
+        console.log("size:" + document.getElementById("hymnLabels").innerHTML);
+        // this.state.selected_labels = labelArray
+        // this.queryByLabels().then()
+    }
     change=(event)=> {
         let labelArray = Array.from(event.target.selectedOptions, option => option.value);
         console.log("selected labels changed:" + labelArray)
@@ -161,7 +174,14 @@ class SongLabels extends React.Component {
                 <table className={styles.tbl}>
                     <tbody>
                     <tr>
+                        <td>过滤标签<br/>（多选按 ⌘ (Win:Ctrl）</td>
+                        <td>诗歌列表</td>
+                        <td>谱/歌词/相关经文/作者</td>
+                    </tr>
+                    <tr>
                         <td className={styles.tdLabels}>
+                            <input name="searchByLabel" placeholder="输入标签来过滤" onChange={this.changeLabel} />
+                            <div id="hymnLabels">
                             <select name="keyLabels" multiple size={40} onChange={this.change}>
                                 {
                                     this.state.basic_labels.map((value,key)=>{
@@ -187,8 +207,10 @@ class SongLabels extends React.Component {
                                     })
                                 }
                             </select>
+                            </div>
                         </td>
                         <td className={styles.tdNames}><SongNames token={this.props.token} songNames={this.state.query_result_song_names} /></td>
+                        <td className={styles.tdPic}><SongPicture /></td>
                     </tr>
                     </tbody>
                 </table>
