@@ -148,57 +148,51 @@ class SongLabels extends React.Component {
         console.log("input label:" + labelValue)
         console.log("basic_labels size:" + this.state.basic_labels.length + "," + this.state.basic_labels)
         // document.getElementById("hymnLabels").style.visibility = "hidden"
-        let selectComponentPrefix = "<select name=\"keyLabels\" multiple size={40} onChange={this.change}>"
-        let selectComponentSuffix = "</select>"
-        let dg = this.dynamicGeneration()
-        let optionGroupPrefix = ""
-        let optionGroupSuffix = "</optgroup>"
-        this.state.song_labels.map((categoryLabel,categoryLabelKey)=>{
-            if (categoryLabel.label === labelValue) {
-                optionGroupPrefix += "<optgroup label=" + categoryLabel.category + ">"
-                optionGroupPrefix += "<option value=" + categoryLabel.label + ">" +
-                    categoryLabel.label + "/" +
-                    categoryLabel.labelAnnotatedCount + "</option>"
-            }
-        })
-        // for (let i = 0; i < dg.length; i++) {
-        //     // console.log("dg:" + dg[i].type)
-        //     console.log("dg props:" + Object.keys(dg[i].props))
-        //     console.log("dg props label:" + dg[i].props.label + ", id:" + dg[i].props.id)
-        //     for (let j = 0; j < dg[i].props.children.length; j++) {
-        //         if (dg[i].props.children[j].type === "option") {
-        //             console.log("dg props children " + j + " value:" + dg[i].props.children[j].props.value)
-        //         }
-        //     }
-        // }
-
-        document.getElementById("hymnLabels").innerHTML = selectComponentPrefix + optionGroupPrefix + optionGroupSuffix + selectComponentSuffix
+        if (labelValue.trim().length > 0) {
+            let selectComponentPrefix = "<select name=\"filteredKeyLabels\" multiple size=\"20\" onchange=alert('ok')>"
+            let selectComponentSuffix = "</select>"
+            let optionGroupPrefix = ""
+            let optionGroupSuffix = "</optgroup>"
+            this.state.song_labels.map((categoryLabel,categoryLabelKey)=>{
+                if (categoryLabel.label.includes(labelValue)) {
+                    optionGroupPrefix += "<optgroup label=" + categoryLabel.category + ">"
+                    optionGroupPrefix += "<option id=" + categoryLabelKey + " value=" + categoryLabel.label + ">" +
+                        categoryLabel.label + "/" +
+                        categoryLabel.labelAnnotatedCount + "</option>"
+                }
+            })
+            document.getElementById("hymnLabels").innerHTML = selectComponentPrefix + optionGroupPrefix + optionGroupSuffix + selectComponentSuffix
+        } else {
+            console.log("input label is EMPTY")
+        }
     }
+    basicLabelsChildrenCount;
+    i;
 
-    dynamicGeneration() {
-        return this.state.basic_labels.map((value,key)=>{
-            this.basicLabelsChildrenCount = 0
-            let result = <optgroup key={key} id={"bl" + key} label={value}>
+    rearrangeLabels(labelPart) {
+        let doFilter = false;
+        if (labelPart.trim().length > 0) {
+            console.log("labelPart:" + labelPart)
+            doFilter = true;
+        } else {
+            console.log("labelPart is EMPTY")
+        }
+        return this.state.basic_labels.map((basicLabel, key) => {
+            return <optgroup key={key} id={"bl" + key} label={basicLabel}>
                 {
-                    this.state.song_labels.map((categoryLabel,categoryLabelKey)=>{
-                        let optionString = ""
-                        if (value === categoryLabel.category) {
-                            this.basicLabelsChildrenCount ++
-                            let i = 0;
-                            this.annotatedSongs[i++] = this.AnnotatedSong(categoryLabel.label, categoryLabel.labelAnnotatedCount)
-                            optionString = <option key={categoryLabelKey} value={categoryLabel.label}>{categoryLabel.label}/{categoryLabel.labelAnnotatedCount}</option>;
+                    this.state.song_labels.map((categoryLabel, categoryLabelKey) => {
+                        if ((!doFilter || categoryLabel.label.includes(labelPart)) &&
+                            basicLabel === categoryLabel.category) {
+                            return <option key={categoryLabelKey} value={categoryLabel.label}>
+                                {categoryLabel.label}/{categoryLabel.labelAnnotatedCount}
+                            </option>
                         }
-                        return optionString
                     })
                 }
             </optgroup>
-            this.state.basic_labels_children_count[key] = this.basicLabelsChildrenCount
-            if (this.state.basic_labels.length === (key + 1) && this.basicLabelsChildrenCount > 0) {
-                this.setBasicLabelsCount()
-            }
-            return result
         })
     }
+
     change=(event)=> {
         let labelArray = Array.from(event.target.selectedOptions, option => option.value);
         console.log("selected labels changed:" + labelArray)
@@ -211,8 +205,6 @@ class SongLabels extends React.Component {
     }
     render() {
         console.log("rendering SongLabels")
-        let i = 0
-        let basicLabelsChildrenCount = 0;
         return (
             <div>
                 <table className={styles.tbl}>
@@ -228,27 +220,7 @@ class SongLabels extends React.Component {
                             <div id="hymnLabels">
                             <select name="keyLabels" multiple size={40} onChange={this.change}>
                                 {
-                                    this.state.basic_labels.map((value,key)=>{
-                                        basicLabelsChildrenCount = 0
-                                        let result = <optgroup key={key} id={"bl" + key} label={value}>
-                                            {
-                                                this.state.song_labels.map((categoryLabel,categoryLabelKey)=>{
-                                                    let optionString = ""
-                                                    if (value === categoryLabel.category) {
-                                                        basicLabelsChildrenCount ++
-                                                        this.annotatedSongs[i++] = this.AnnotatedSong(categoryLabel.label, categoryLabel.labelAnnotatedCount)
-                                                        optionString = <option key={categoryLabelKey} value={categoryLabel.label}>{categoryLabel.label}/{categoryLabel.labelAnnotatedCount}</option>;
-                                                    }
-                                                    return optionString
-                                                })
-                                            }
-                                        </optgroup>
-                                        this.state.basic_labels_children_count[key] = basicLabelsChildrenCount
-                                        if (this.state.basic_labels.length === (key + 1) && basicLabelsChildrenCount > 0) {
-                                            this.setBasicLabelsCount()
-                                        }
-                                        return result
-                                    })
+                                    this.rearrangeLabels("圣")
                                 }
                             </select>
                             </div>
@@ -262,5 +234,4 @@ class SongLabels extends React.Component {
         )
     }
 }
-
 export default SongLabels;
