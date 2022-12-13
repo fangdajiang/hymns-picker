@@ -11,7 +11,9 @@ const NOT_AVAILABLE = "(请稍等)"
 const INVALID_CONDITIONS = "(请修改过滤标签)"
 const ZERO_RESULTS = "(无结果)"
 const INVALID_BACKEND = "(搜索库故障)"
-
+const sleep = ms => new Promise(
+    resolve => setTimeout(resolve, ms)
+);
 class SongLabels extends React.Component {
     AnnotatedSong = (annotatedLabel, annotationsCount) => {
         return {annotatedLabel: annotatedLabel, annotationsCount: annotationsCount}
@@ -26,7 +28,8 @@ class SongLabels extends React.Component {
             basic_labels:[],
             song_labels:[],
             selected_labels:[],
-            labels_loaded:false,
+            filter_labels:"",
+            rearranged_labels:[],
             query_result_song_names: ""
         }
     }
@@ -71,7 +74,7 @@ class SongLabels extends React.Component {
         console.log("getting basic labels")
 
         let resp = await this.fetchData(CATEGORY_API_URL);
-        console.log("resp:" + resp);
+        console.log("basic labels:" + resp);
         this.setState({
             basic_labels:resp,
         })
@@ -80,9 +83,7 @@ class SongLabels extends React.Component {
         console.log("getting song labels")
 
         let resp = await this.fetchData(LABELS_API_URL);
-        this.setState({
-            song_labels:resp
-        })
+        this.state.song_labels = resp;
     }
     async queryByLabels() {
         console.log("queryByLabels")
@@ -132,76 +133,67 @@ class SongLabels extends React.Component {
             })
         }
     };
-    setBasicLabelsCount() {
-        if (!this.state.labels_loaded) {
-            console.log("setBasicLabelsCount")
-            for (let i = 0; i < this.state.basic_labels.length; i++) {
-                let optGroupLabel = document.getElementById("bl" + i).getAttribute("label")
-                document.getElementById("bl" + i).setAttribute("label", optGroupLabel + "/" + this.state.basic_labels_children_count[i])
-            }
-            this.state.labels_loaded = true
+    async setBasicLabelsCount() {
+        await sleep(3000);
+        console.log("setBasicLabelsCount:" + document.getElementById("bl0"))
+        for (let i = 0; i < this.state.basic_labels.length; i++) {
+            let optGroupLabel = document.getElementById("bl" + i).getAttribute("label")
+            document.getElementById("bl" + i).setAttribute("label", optGroupLabel + "/" + this.state.basic_labels_children_count[i])
         }
     }
 
     changeLabel=(event)=> {
-        let labelValue = event.target.value;
-        console.log("input label:" + labelValue)
-        console.log("basic_labels size:" + this.state.basic_labels.length + "," + this.state.basic_labels)
-        // document.getElementById("hymnLabels").style.visibility = "hidden"
-        if (labelValue.trim().length > 0) {
-            let selectComponentPrefix = "<select name=\"filteredKeyLabels\" multiple size=\"20\" onchange=alert('ok')>"
-            let selectComponentSuffix = "</select>"
-            let optionGroupPrefix = ""
-            let optionGroupSuffix = "</optgroup>"
-            this.state.song_labels.map((categoryLabel,categoryLabelKey)=>{
-                if (categoryLabel.label.includes(labelValue)) {
-                    optionGroupPrefix += "<optgroup label=" + categoryLabel.category + ">"
-                    optionGroupPrefix += "<option id=" + categoryLabelKey + " value=" + categoryLabel.label + ">" +
-                        categoryLabel.label + "/" +
-                        categoryLabel.labelAnnotatedCount + "</option>"
-                }
-            })
-            document.getElementById("hymnLabels").innerHTML = selectComponentPrefix + optionGroupPrefix + optionGroupSuffix + selectComponentSuffix
-        } else {
-            console.log("input label is EMPTY")
-        }
+        this.state.filter_labels = event.target.value
+        this.state.rearranged_labels = this.rearrangeLabels()
     }
-    basicLabelsChildrenCount;
-    i;
 
-    rearrangeLabels(labelPart) {
+    rearrangeLabels() {
         let doFilter = false;
-        if (labelPart.trim().length > 0) {
-            console.log("labelPart:" + labelPart)
+        if (this.state.filter_labels.trim().length > 0) {
+            console.log("filter labels:" + this.state.filter_labels)
             doFilter = true;
         } else {
-            console.log("labelPart is EMPTY")
+            console.log("filter label(s) is EMPTY")
         }
-        return this.state.basic_labels.map((basicLabel, key) => {
-            return <optgroup key={key} id={"bl" + key} label={basicLabel}>
-                {
-                    this.state.song_labels.map((categoryLabel, categoryLabelKey) => {
-                        if ((!doFilter || categoryLabel.label.includes(labelPart)) &&
-                            basicLabel === categoryLabel.category) {
-                            return <option key={categoryLabelKey} value={categoryLabel.label}>
-                                {categoryLabel.label}/{categoryLabel.labelAnnotatedCount}
-                            </option>
+        return <select name="keyLabels" multiple size={40} onChange={this.change}>
+            {
+                this.state.basic_labels.map((basicLabel, key) => {
+                    this.basicLabelsChildrenCount = 0
+                    let result = <optgroup key={key} id={"bl" + key} label={basicLabel}>
+                        {
+                            this.state.song_labels.map((categoryLabel, categoryLabelKey) => {
+                                if ((!doFilter || categoryLabel.label.includes(this.state.filter_labels)) &&
+                                    basicLabel === categoryLabel.category) {
+                                    this.basicLabelsChildrenCount ++
+                                    let i = 0;
+                                    this.annotatedSongs[i++] = this.AnnotatedSong(categoryLabel.label, categoryLabel.labelAnnotatedCount)
+                                    return <option key={categoryLabelKey} value={categoryLabel.label}>
+                                        {categoryLabel.label}/{categoryLabel.labelAnnotatedCount}
+                                    </option>
+                                }
+                            })
                         }
-                    })
-                }
-            </optgroup>
-        })
+                    </optgroup>
+                    this.state.basic_labels_children_count[key] = this.basicLabelsChildrenCount
+                    return result
+                })
+            }
+        </select>
     }
 
     change=(event)=> {
         let labelArray = Array.from(event.target.selectedOptions, option => option.value);
         console.log("selected labels changed:" + labelArray)
+        // using setState will cause delay assignment and mismatched data
         this.state.selected_labels = labelArray
         this.queryByLabels().then()
     }
     componentDidMount() {
         this.getBasicLabels().then()
-        this.getSongLabels().then()
+        this.getSongLabels().then(() => {
+            this.state.rearranged_labels = this.rearrangeLabels()
+        })
+        this.setBasicLabelsCount().then()
     }
     render() {
         console.log("rendering SongLabels")
@@ -211,18 +203,16 @@ class SongLabels extends React.Component {
                     <tbody>
                     <tr>
                         <td>过滤标签<br/>（多选按 ⌘ (Win:Ctrl）</td>
-                        <td>诗歌列表</td>
+                        <td>诗歌列表-{this.state.filter_labels.length}</td>
                         <td>谱/歌词/相关经文/作者</td>
                     </tr>
                     <tr>
                         <td className={styles.tdLabels}>
-                            <input name="searchByLabel" placeholder="输入标签来过滤" onChange={this.changeLabel} />
+                            <input name="searchByLabel" placeholder="输入标签进行过滤" onChange={this.changeLabel} />
                             <div id="hymnLabels">
-                            <select name="keyLabels" multiple size={40} onChange={this.change}>
                                 {
-                                    this.rearrangeLabels("圣")
+                                    this.state.rearranged_labels
                                 }
-                            </select>
                             </div>
                         </td>
                         <td className={styles.tdNames}><SongNames token={this.props.token} songNames={this.state.query_result_song_names} /></td>
