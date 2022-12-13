@@ -144,16 +144,60 @@ class SongLabels extends React.Component {
     }
 
     changeLabel=(event)=> {
-        let labelArray = event.target.value;
-        console.log("input label:" + labelArray)
-        console.log("basic_labels:" + this.state.basic_labels)
+        let labelValue = event.target.value;
+        console.log("input label:" + labelValue)
+        console.log("basic_labels size:" + this.state.basic_labels.length + "," + this.state.basic_labels)
+        // document.getElementById("hymnLabels").style.visibility = "hidden"
+        let selectComponentPrefix = "<select name=\"keyLabels\" multiple size={40} onChange={this.change}>"
+        let selectComponentSuffix = "</select>"
+        let dg = this.dynamicGeneration()
+        let optionGroupPrefix = ""
+        let optionGroupSuffix = "</optgroup>"
         this.state.song_labels.map((categoryLabel,categoryLabelKey)=>{
-            console.log("category:" + categoryLabel.category + ", label:" + categoryLabel.label + ", categoryLabelKey:" + categoryLabelKey)
+            if (categoryLabel.label === labelValue) {
+                optionGroupPrefix += "<optgroup label=" + categoryLabel.category + ">"
+                optionGroupPrefix += "<option value=" + categoryLabel.label + ">" +
+                    categoryLabel.label + "/" +
+                    categoryLabel.labelAnnotatedCount + "</option>"
+            }
         })
-        document.getElementById("hymnLabels").style.visibility = "hidden"
-        console.log("size:" + document.getElementById("hymnLabels").innerHTML);
-        // this.state.selected_labels = labelArray
-        // this.queryByLabels().then()
+        // for (let i = 0; i < dg.length; i++) {
+        //     // console.log("dg:" + dg[i].type)
+        //     console.log("dg props:" + Object.keys(dg[i].props))
+        //     console.log("dg props label:" + dg[i].props.label + ", id:" + dg[i].props.id)
+        //     for (let j = 0; j < dg[i].props.children.length; j++) {
+        //         if (dg[i].props.children[j].type === "option") {
+        //             console.log("dg props children " + j + " value:" + dg[i].props.children[j].props.value)
+        //         }
+        //     }
+        // }
+
+        document.getElementById("hymnLabels").innerHTML = selectComponentPrefix + optionGroupPrefix + optionGroupSuffix + selectComponentSuffix
+    }
+
+    dynamicGeneration() {
+        return this.state.basic_labels.map((value,key)=>{
+            this.basicLabelsChildrenCount = 0
+            let result = <optgroup key={key} id={"bl" + key} label={value}>
+                {
+                    this.state.song_labels.map((categoryLabel,categoryLabelKey)=>{
+                        let optionString = ""
+                        if (value === categoryLabel.category) {
+                            this.basicLabelsChildrenCount ++
+                            let i = 0;
+                            this.annotatedSongs[i++] = this.AnnotatedSong(categoryLabel.label, categoryLabel.labelAnnotatedCount)
+                            optionString = <option key={categoryLabelKey} value={categoryLabel.label}>{categoryLabel.label}/{categoryLabel.labelAnnotatedCount}</option>;
+                        }
+                        return optionString
+                    })
+                }
+            </optgroup>
+            this.state.basic_labels_children_count[key] = this.basicLabelsChildrenCount
+            if (this.state.basic_labels.length === (key + 1) && this.basicLabelsChildrenCount > 0) {
+                this.setBasicLabelsCount()
+            }
+            return result
+        })
     }
     change=(event)=> {
         let labelArray = Array.from(event.target.selectedOptions, option => option.value);
