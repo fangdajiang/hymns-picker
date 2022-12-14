@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOMServer from 'react-dom/server';
 import SongNames from "./SongNames";
 import styles from "./SongLabels.module.css";
 import SongPicture from "./SongPicture";
@@ -145,6 +146,7 @@ class SongLabels extends React.Component {
     changeLabel=(event)=> {
         this.state.filter_labels = event.target.value
         this.state.rearranged_labels = this.rearrangeLabels()
+        document.getElementById("hymnLabels").innerHTML = ReactDOMServer.renderToStaticMarkup(this.state.rearranged_labels)
     }
 
     rearrangeLabels() {
