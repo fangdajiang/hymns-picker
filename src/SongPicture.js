@@ -7,13 +7,12 @@ class SongPicture extends Component {
         super(props);
         this.state = {
             alt:"诗歌谱",
-            url:"https://cdn.v2ex.com/gravatar/58281e9a97a352b24be21e04f5d228e2?s=73&d=retro"
+            url:"http://localhost:3000/tlbc.png"
         }
     }
     render() {
         return (
             <div>
-                <div><img src={this.state.url}  alt={this.state.alt}/></div>
                 <div><MContext.Consumer>
                     {
                         (context) => (
@@ -23,6 +22,7 @@ class SongPicture extends Component {
                         )
                     }
                 </MContext.Consumer></div>
+                <div><img src={this.state.url}  alt={this.state.alt}/></div>
             </div>
         )
     }

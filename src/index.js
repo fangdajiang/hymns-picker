@@ -1,11 +1,11 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { hydrateRoot } from 'react-dom/client';
+// import ReactDOM from 'react-dom'
 import styles from './index.module.css';
 import SongLabels from './SongLabels';
 
 const TOKEN = process.env.REACT_APP_HYMNS_PICKER_TOKEN
 const ELASTIC_SEARCH_SUMMARY_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/songs/summary';
-const SONG_SUMMARY_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/songs/summary';
 
 class Index extends React.Component {
     //构造函数
@@ -22,7 +22,6 @@ class Index extends React.Component {
     }
     componentDidMount() {
         this.getElasticSearchSummary().then();
-        this.getSongSummary().then();
     }
     async fetchData(url) {
         return fetch(url, {
@@ -45,25 +44,18 @@ class Index extends React.Component {
             elastic_search_annotated_tasks_count:resp.annotationCount,
         })
     }
-    async getSongSummary() {
-        console.log("getting song summary")
-        let resp = await this.fetchData(SONG_SUMMARY_API_URL);
-        console.log("song summary total number: " + resp.totalNumber + ", song summary annotation count: " + resp.annotationCount);
-        this.setState({
-            song_summary_total_number:resp.totalNumber,
-            song_summary_annotation_count:resp.annotationCount,
-        })
-    }
     render() {
         return (
             <div><MyProvider>
                 <div>
                     <table className={styles.tbl}>
-                        <caption className={styles.caption}>TLBC 三分钟选歌 <font size = "4">(Alpha)</font>
-                            【诗歌总数：<span title={"LS诗歌总数：" + this.state.song_summary_total_number}>{this.state.elastic_search_total_tasks_count}</span>
-                            ，已打标签诗歌：<span title={"LS已打标签总数：" + this.state.song_summary_annotation_count}>{this.state.elastic_search_annotated_tasks_count}</span>】
-                        </caption>
-                        <thead>
+                        <tbody>
+                        <tr>
+                            <td className={styles.caption}>TLBC 三分钟选歌 <font size = "4">(Beta)</font>
+                                【诗歌总数：<span title={"LS诗歌总数：" + this.state.song_summary_total_number}>{this.state.elastic_search_total_tasks_count}</span>
+                                ，已打标签诗歌：<span title={"LS已打标签总数：" + this.state.song_summary_annotation_count}>{this.state.elastic_search_annotated_tasks_count}</span>】
+                            </td>
+                        </tr>
                         <tr>
                             <td className={styles.tblHead} colSpan="3">
                                 <table className={styles.tbl}>
@@ -85,8 +77,6 @@ class Index extends React.Component {
                                 </table>
                             </td>
                         </tr>
-                        </thead>
-                        <tbody>
                         <tr>
                             <td className={styles.tdLabels} colSpan="3">
                                 <SongLabels token={TOKEN} />
@@ -99,8 +89,12 @@ class Index extends React.Component {
         );
     }
 }
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<Index />);
+// const root = ReactDOM.createRoot(document.getElementById("root"));
+// root.render(<Index />);
+hydrateRoot(
+    document.getElementById('root'),
+    <Index />
+)
 
 export const MContext = React.createContext();
 class MyProvider extends React.Component {

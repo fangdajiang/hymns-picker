@@ -26,7 +26,7 @@ class SongNames extends Component {
                             this.props.songNames.split(',').map((songName, key) => {
                                 if (songName !== "") {
                                     return <li key={key}>
-                                        <a className={styles.songName} href="/#" onClick={()=>{
+                                        <a className={styles.songName} href="javascript:void(0)" onClick={()=>{
                                             context.setImage(
                                                 SONG_PICTURE_URL_PREFIX + songName + SONG_PICTURE_URL_SUFFIX,
                                                 SONG_PICTURE_URL_PREFIX + songName,
