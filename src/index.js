@@ -1,6 +1,5 @@
 import React from 'react';
-import { hydrateRoot } from 'react-dom/client';
-// import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client';
 import styles from './index.module.css';
 import SongLabels from './SongLabels';
 
@@ -89,14 +88,15 @@ class Index extends React.Component {
         );
     }
 }
-// const root = ReactDOM.createRoot(document.getElementById("root"));
-// root.render(<Index />);
-hydrateRoot(
-    document.getElementById('root'),
-    <Index />
-)
+const root = createRoot(document.getElementById("root"));
+root.render(<Index />);
+// ReactDOM.hydrateRoot(
+//     document.getElementById('root'),
+//     <Index />
+// )
+// ReactDOM.render(<Index/>, document.getElementById("root"));
 
-export const MContext = React.createContext();
+export const MContext = React.createContext(null);
 class MyProvider extends React.Component {
     state = {message: ""}
     render() {

@@ -4,20 +4,31 @@
   horiz-align: right;
 }
 .tdLabels {
-  width: 30%;
+  width: 25%;
   border: 1px ridge #cccccc;
   text-align: left;
   vertical-align: text-top;
 }
+.labelItem:hover {
+  color: #ffffff;
+  background-color: #005ba6;
+  cursor: pointer;
+}
 .tdNames {
-  width: 30%;
+  width: 20%;
   color: #005ba6;
   border: 1px ridge #cccccc;
   text-align: left;
   vertical-align: top;
 }
 .tdPic {
-  width: 40%;
+  width: 30%;
+  border: 1px ridge #cccccc;
+  text-align: left;
+  vertical-align: top;
+}
+.tdGroup {
+  width: 25%;
   border: 1px ridge #cccccc;
   text-align: left;
   vertical-align: top;

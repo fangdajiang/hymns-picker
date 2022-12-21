@@ -3,10 +3,13 @@ import ReactDOMServer from 'react-dom/server';
 import SongNames from "./SongNames";
 import styles from "./SongLabels.module.css";
 import SongPicture from "./SongPicture";
+import SongGroup from "./SongGroup";
 
 const CATEGORY_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/labels/categories';
 const LABELS_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/labels';
 const TASK_API_PREFIX_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + "/songs?";
+const GROUP1_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/songs/hymns/group1';
+const GROUPS_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/songs/hymns/groups';
 
 const NOT_AVAILABLE = "(请稍等)"
 const INVALID_CONDITIONS = "(请修改过滤标签)"
@@ -25,6 +28,8 @@ class SongLabels extends React.Component {
         super(props);
         //react定义数据
         this.state = {
+            hymns_group1:[],
+            hymns_groups:[],
             basic_labels_children_count:[],
             basic_labels:[],
             song_labels:[],
@@ -135,12 +140,25 @@ class SongLabels extends React.Component {
         }
     };
     async setBasicLabelsCount() {
-        await sleep(3000);
+        await sleep(2800);
         console.log("setBasicLabelsCount:" + document.getElementById("bl0"))
         for (let i = 0; i < this.state.basic_labels.length; i++) {
             let optGroupLabel = document.getElementById("bl" + i).getAttribute("label")
             document.getElementById("bl" + i).setAttribute("label", optGroupLabel + "/" + this.state.basic_labels_children_count[i])
         }
+    }
+
+    async getSongGroup1() {
+        console.log("getting song group1")
+
+        let resp = await this.fetchData(GROUP1_API_URL);
+        this.state.hymns_group1 = resp;
+    }
+    async getSongGroups() {
+        console.log("getting song groups")
+
+        let resp = await this.fetchData(GROUPS_API_URL);
+        this.state.hymns_groups = resp;
     }
 
     changeLabel=(event)=> {
@@ -169,7 +187,7 @@ class SongLabels extends React.Component {
                                     this.basicLabelsChildrenCount ++
                                     let i = 0;
                                     this.annotatedSongs[i++] = this.AnnotatedSong(categoryLabel.label, categoryLabel.labelAnnotatedCount)
-                                    return <option key={categoryLabelKey} value={categoryLabel.label}>
+                                    return <option className={styles.labelItem} key={categoryLabelKey} value={categoryLabel.label}>
                                         {categoryLabel.label}/{categoryLabel.labelAnnotatedCount}
                                     </option>
                                 }
@@ -196,6 +214,8 @@ class SongLabels extends React.Component {
             this.state.rearranged_labels = this.rearrangeLabels()
         })
         this.setBasicLabelsCount().then()
+        this.getSongGroup1().then()
+        this.getSongGroups().then()
     }
     render() {
         console.log("rendering SongLabels")
@@ -207,6 +227,7 @@ class SongLabels extends React.Component {
                         <td>过滤标签<br/>（多选按 ⌘ (Win:Ctrl）</td>
                         <td>诗歌列表-{this.state.filter_labels.length}</td>
                         <td>谱/歌词/相关经文/作者</td>
+                        <td>过滤分组</td>
                     </tr>
                     <tr>
                         <td className={styles.tdLabels}>
@@ -219,6 +240,7 @@ class SongLabels extends React.Component {
                         </td>
                         <td className={styles.tdNames}><SongNames token={this.props.token} songNames={this.state.query_result_song_names} /></td>
                         <td className={styles.tdPic}><SongPicture /></td>
+                        <td className={styles.tdGroup}><SongGroup hymnsGroup1={this.state.hymns_group1} hymnsGroups={this.state.hymns_groups} /></td>
                     </tr>
                     </tbody>
                 </table>

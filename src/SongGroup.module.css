@@ -1,0 +1,9 @@
+.songGroup {
+  color: #000000;
+  width: 100%;
+}
+.songGroupItem:hover {
+  color: #ffffff;
+  background-color: #005ba6;
+  cursor: pointer;
+}
