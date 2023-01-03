@@ -5,6 +5,16 @@ import {MContext} from "./index";
 class SongGroup extends Component {
     constructor(props) {
         super(props);
+        this.state = {
+            selected_group2: ""
+        }
+    }
+    change=(event)=> {
+        let labelArray = Array.from(event.target.selectedOptions, option => option.value);
+        console.log("selected group2 name changed:" + labelArray)
+        // using setState will cause delay assignment and mismatched data
+        this.state.selected_group2 = labelArray
+        this.queryByLabels().then()
     }
     render() {
         console.log("rendering SongGroup")
