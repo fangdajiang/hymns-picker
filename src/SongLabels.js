@@ -89,6 +89,8 @@ class SongLabels extends React.Component {
         console.log("getting song labels")
 
         let resp = await this.fetchData(LABELS_API_URL);
+        console.log("song labels length:" + resp.length);
+        // using setState will cause delay assignment and mismatched data
         this.state.song_labels = resp;
     }
     async queryByLabels() {
@@ -141,10 +143,14 @@ class SongLabels extends React.Component {
     };
     async setBasicLabelsCount() {
         await sleep(2800);
-        console.log("setBasicLabelsCount:" + document.getElementById("bl0"))
-        for (let i = 0; i < this.state.basic_labels.length; i++) {
-            let optGroupLabel = document.getElementById("bl" + i).getAttribute("label")
-            document.getElementById("bl" + i).setAttribute("label", optGroupLabel + "/" + this.state.basic_labels_children_count[i])
+        let bl0 = document.getElementById("bl0");
+        if (bl0 != null) {
+            for (let i = 0; i < this.state.basic_labels.length; i++) {
+                let optGroupLabel = document.getElementById("bl" + i).getAttribute("label")
+                document.getElementById("bl" + i).setAttribute("label", optGroupLabel + "/" + this.state.basic_labels_children_count[i])
+            }
+        } else {
+            console.log("setBasicLabelsCount FAILED, bl0:" + bl0)
         }
     }
 
@@ -209,10 +215,12 @@ class SongLabels extends React.Component {
         this.queryByLabels().then()
     }
     componentDidMount() {
-        this.getBasicLabels().then()
-        this.getSongLabels().then(() => {
-            this.state.rearranged_labels = this.rearrangeLabels()
+        this.getBasicLabels().then(() => {
+            this.getSongLabels().then(() => {
+                this.state.rearranged_labels = this.rearrangeLabels()
+            })
         })
+
         this.setBasicLabelsCount().then()
         this.getSongGroup1().then()
         this.getSongGroups().then()
