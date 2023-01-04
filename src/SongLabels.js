@@ -18,6 +18,18 @@ const INVALID_BACKEND = "(搜索库故障)"
 const sleep = ms => new Promise(
     resolve => setTimeout(resolve, ms)
 );
+export async function fetchData(url, token) {
+    return fetch(url, {
+        headers: {
+            'Authorization': `token ${token}`
+        },
+        method: 'GET'
+    })
+        .then(response => response.json())
+        .catch(function (error) {
+            console.log(error);
+        });
+}
 class SongLabels extends React.Component {
     AnnotatedSong = (annotatedLabel, annotationsCount) => {
         return {annotatedLabel: annotatedLabel, annotationsCount: annotationsCount}
@@ -40,18 +52,6 @@ class SongLabels extends React.Component {
         }
     }
     //请求接口的方法
-    async fetchData(url) {
-        return fetch(url, {
-            headers: {
-                'Authorization': `token ${this.props.token}`
-            },
-            method: 'GET'
-        })
-        .then(response => response.json())
-        .catch(function (error) {
-            console.log(error);
-        });
-    }
     async getTasks() {
         let songNames = ""
         let selectedLabelsArray = this.state.selected_labels
@@ -61,7 +61,7 @@ class SongLabels extends React.Component {
             for (let index in selectedLabelsArray) {
                 selectedLabelsAsQueryString += "label=" + selectedLabelsArray[index] + "&"
             }
-            let resp = await this.fetchData(TASK_API_PREFIX_URL + selectedLabelsAsQueryString);
+            let resp = await fetchData(TASK_API_PREFIX_URL + selectedLabelsAsQueryString);
             if (undefined !== resp) {
                 for (let i in resp) {
                     console.log("song name:'" + resp[i].nameCn + "'")
@@ -79,7 +79,7 @@ class SongLabels extends React.Component {
     async getBasicLabels() {
         console.log("getting basic labels")
 
-        let resp = await this.fetchData(CATEGORY_API_URL);
+        let resp = await fetchData(CATEGORY_API_URL);
         console.log("basic labels:" + resp);
         this.setState({
             basic_labels:resp,
@@ -88,12 +88,12 @@ class SongLabels extends React.Component {
     async getSongLabels() {
         console.log("getting song labels")
 
-        let resp = await this.fetchData(LABELS_API_URL);
+        let resp = await fetchData(LABELS_API_URL);
         console.log("song labels length:" + resp.length);
         // using setState will cause delay assignment and mismatched data
         this.state.song_labels = resp;
     }
-    async queryByLabels() {
+    queryByLabels() {
         console.log("queryByLabels")
         let songNames = NOT_AVAILABLE
 
@@ -157,13 +157,13 @@ class SongLabels extends React.Component {
     async getSongGroup1() {
         console.log("getting song group1")
 
-        let resp = await this.fetchData(GROUP1_API_URL);
+        let resp = await fetchData(GROUP1_API_URL);
         this.state.hymns_group1 = resp;
     }
     async getSongGroups() {
         console.log("getting song groups")
 
-        let resp = await this.fetchData(GROUPS_API_URL);
+        let resp = await fetchData(GROUPS_API_URL);
         this.state.hymns_groups = resp;
     }
 
@@ -212,7 +212,7 @@ class SongLabels extends React.Component {
         console.log("selected labels changed:" + labelArray)
         // using setState will cause delay assignment and mismatched data
         this.state.selected_labels = labelArray
-        this.queryByLabels().then()
+        this.queryByLabels()
     }
     componentDidMount() {
         this.getBasicLabels().then(() => {

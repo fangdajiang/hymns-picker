@@ -14,7 +14,7 @@ class SongGroup extends Component {
         console.log("selected group2 name changed:" + labelArray)
         // using setState will cause delay assignment and mismatched data
         this.state.selected_group2 = labelArray
-        this.queryByLabels().then()
+        // this.queryByLabels().then()
     }
     render() {
         console.log("rendering SongGroup")

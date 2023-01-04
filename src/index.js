@@ -2,6 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import styles from './index.module.css';
 import SongLabels from './SongLabels';
+import { fetchData } from './SongLabels'
 
 const TOKEN = process.env.REACT_APP_HYMNS_PICKER_TOKEN
 const ELASTIC_SEARCH_SUMMARY_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/songs/summary';
@@ -13,7 +14,6 @@ class Index extends React.Component {
         //react定义数据
         this.state = {
             elastic_search_total_tasks_count:"?",
-            song_summary_total_number:"?",
             elastic_search_annotated_tasks_count:"?",
             song_summary_annotation_count:"?",
             token:""
@@ -22,21 +22,9 @@ class Index extends React.Component {
     componentDidMount() {
         this.getElasticSearchSummary().then();
     }
-    async fetchData(url) {
-        return fetch(url, {
-            headers: {
-                'Authorization': `token ${TOKEN}`
-            },
-            method: 'GET'
-        })
-            .then(response => response.json())
-            .catch(function (error) {
-                console.log(error);
-            });
-    }
     async getElasticSearchSummary() {
         console.log("getting elastic search summary")
-        let resp = await this.fetchData(ELASTIC_SEARCH_SUMMARY_API_URL);
+        let resp = await fetchData(ELASTIC_SEARCH_SUMMARY_API_URL);
         console.log("elastic search total number: " + resp.totalNumber + ", elastic search annotation count: " + resp.annotationCount);
         this.setState({
             elastic_search_total_tasks_count:resp.totalNumber,
@@ -51,8 +39,8 @@ class Index extends React.Component {
                         <tbody>
                         <tr>
                             <td className={styles.caption}>TLBC 三分钟选歌 <font size = "4">(Beta)</font>
-                                【诗歌总数：<span title={"LS诗歌总数：" + this.state.song_summary_total_number}>{this.state.elastic_search_total_tasks_count}</span>
-                                ，已打标签诗歌：<span title={"LS已打标签总数：" + this.state.song_summary_annotation_count}>{this.state.elastic_search_annotated_tasks_count}</span>】
+                                【诗歌总数：<span>{this.state.elastic_search_total_tasks_count}</span>
+                                ，已打标签诗歌：<span>{this.state.elastic_search_annotated_tasks_count}</span>】
                             </td>
                         </tr>
                         <tr>
