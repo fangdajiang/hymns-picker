@@ -2,7 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import styles from './index.module.css';
 import SongLabels from './SongLabels';
-import { fetchData } from './SongLabels'
+import { fetchData } from './common'
 
 const TOKEN = process.env.REACT_APP_HYMNS_PICKER_TOKEN
 const ELASTIC_SEARCH_SUMMARY_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/songs/summary';

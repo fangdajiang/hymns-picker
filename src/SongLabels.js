@@ -4,6 +4,7 @@ import SongNames from "./SongNames";
 import styles from "./SongLabels.module.css";
 import SongPicture from "./SongPicture";
 import SongGroup from "./SongGroup";
+import { fetchData, NOT_AVAILABLE, ZERO_RESULTS, INVALID_BACKEND } from "./common";
 
 const CATEGORY_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/labels/categories';
 const LABELS_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/labels';
@@ -11,25 +12,10 @@ const TASK_API_PREFIX_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + "/songs?
 const GROUP1_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/songs/hymns/group1';
 const GROUPS_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/songs/hymns/groups';
 
-const NOT_AVAILABLE = "(请稍等)"
 const INVALID_CONDITIONS = "(请修改过滤标签)"
-const ZERO_RESULTS = "(无结果)"
-const INVALID_BACKEND = "(搜索库故障)"
 const sleep = ms => new Promise(
     resolve => setTimeout(resolve, ms)
 );
-export async function fetchData(url, token) {
-    return fetch(url, {
-        headers: {
-            'Authorization': `token ${token}`
-        },
-        method: 'GET'
-    })
-        .then(response => response.json())
-        .catch(function (error) {
-            console.log(error);
-        });
-}
 class SongLabels extends React.Component {
     AnnotatedSong = (annotatedLabel, annotationsCount) => {
         return {annotatedLabel: annotatedLabel, annotationsCount: annotationsCount}
