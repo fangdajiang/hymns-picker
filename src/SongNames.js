@@ -1,7 +1,7 @@
 import React, { Component} from "react";
 import {MContext} from "./index";
 import styles from './SongNames.module.css';
-import {fetchData, ZERO_RESULTS} from "./common";
+import {fetchData, ZERO_RESULTS, NEED_MORE_WORDS} from "./common";
 
 const SONG_PICTURE_URL_PREFIX = 'https://hymns.oss-cn-shanghai.aliyuncs.com/pics/';
 const SONG_PICTURE_URL_SUFFIX = '.png?x-oss-process=image/resize,p_15';
@@ -12,7 +12,7 @@ class SongNames extends Component {
         super(props);
         this.state = {
             filter_names:"",
-            query_result_song_names: "",
+            query_result_song_names: this.props.songNames,
             name:"Hello",
             joy:{
                 coding:"Go!"
@@ -27,30 +27,35 @@ class SongNames extends Component {
     }
     queryByName() {
         console.log("queryByName")
+        let songNames = ""
         if (this.state.filter_names.trim().length > 1) {
             this.findSongNames().then((resp) => {
-                let songNames = ZERO_RESULTS
-                if (undefined !== resp) {
-                    console.log("found song names length:" + resp.length + ":'" + resp + "'")
-                    if (resp.length !== 0) {
-                        for (let i in resp) {
-                            console.log("song name:'" + resp[i].nameCn + "'")
-                            songNames += resp[i].nameCn + ","
-                        }
-                    } else {
-                        console.log("resp length is 0")
+                if (undefined !== resp && 0 !== resp.length) {
+                    console.log("found song names length:" + resp.length)
+                    for (let i in resp) {
+                        console.log("song name:'" + resp[i].nameCn + "'")
+                        songNames += resp[i].nameCn + ","
                     }
                 } else {
-                    console.log("resp is undefined")
+                    console.log("resp is undefined or length 0")
+                    songNames = ZERO_RESULTS
                 }
                 this.setState({
                     query_result_song_names: songNames
                 })
             })
-        } else {
+        } else if (this.state.filter_names.trim().length === 1) {
             console.log("filter_names length SHOULD > 1")
+            this.clearResults(NEED_MORE_WORDS)
+        } else {
+            this.clearResults("")
         }
     };
+    clearResults(empty) {
+        this.setState({
+            query_result_song_names: empty
+        })
+    }
     changeName=(event)=> {
         this.state.filter_names = event.target.value
         console.log("inputted song name:" + this.state.filter_names)
@@ -60,6 +65,7 @@ class SongNames extends Component {
         console.log("rendering SongNames")
         return (
             <div>
+                <li>{this.state.name} {this.state.joy.coding}</li>
                 <li><input name="searchByName" placeholder="过滤歌名" onChange={this.changeName} /></li>
                 <div id="hymnNames">
                     <MContext.Consumer>
@@ -85,29 +91,6 @@ class SongNames extends Component {
                         }
                     </MContext.Consumer>
                 </div>
-                <li>{this.state.name} {this.state.joy.coding}</li>
-                <MContext.Consumer>
-                    {
-                        (context) => (
-                            this.props.songNames.split(',').map((songName, key) => {
-                                if (songName !== "") {
-                                    return <li key={key}>
-                                        <a className={styles.songName} href="#!" onClick={()=>{
-                                            context.setImage(
-                                                SONG_PICTURE_URL_PREFIX + songName + SONG_PICTURE_URL_SUFFIX,
-                                                SONG_PICTURE_URL_PREFIX + songName,
-                                                songName)
-                                        }}>
-                                            { songName }
-                                        </a>
-                                    </li>
-                                } else {
-                                    return ""
-                                }
-                            })
-                        )
-                    }
-                </MContext.Consumer>
             </div>
         )
     }
