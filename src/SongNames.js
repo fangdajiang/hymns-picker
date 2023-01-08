@@ -12,6 +12,7 @@ class SongNames extends Component {
         super(props);
         this.state = {
             filter_names:"",
+            last_props_songNames: this.props.songNames,
             query_result_song_names: this.props.songNames,
             name:"Hello",
             joy:{
@@ -63,10 +64,18 @@ class SongNames extends Component {
     }
     render() {
         console.log("rendering SongNames")
+        if (this.state.last_props_songNames !== this.props.songNames) {
+            console.log("new results coming:" + this.props.songNames)
+            this.state.last_props_songNames = this.props.songNames
+            this.state.query_result_song_names = this.props.songNames
+            document.getElementById("searchByName").value = ""
+        } else {
+            console.log("using last props songNames:" + this.state.last_props_songNames)
+        }
         return (
             <div>
                 <li>{this.state.name} {this.state.joy.coding}</li>
-                <li><input name="searchByName" placeholder="过滤歌名" onChange={this.changeName} /></li>
+                <li><input id="searchByName" placeholder="过滤歌名" onChange={this.changeName} /></li>
                 <div id="hymnNames">
                     <MContext.Consumer>
                         {
