@@ -4,7 +4,7 @@
   horiz-align: right;
 }
 .tdLabels {
-  width: 25%;
+  width: 15%;
   border: 1px ridge #cccccc;
   text-align: left;
   vertical-align: text-top;
@@ -22,14 +22,23 @@
   vertical-align: top;
 }
 .tdPic {
-  width: 30%;
+  width: 50%;
   border: 1px ridge #cccccc;
   text-align: left;
   vertical-align: top;
 }
 .tdGroup {
-  width: 25%;
+  width: 15%;
   border: 1px ridge #cccccc;
   text-align: left;
   vertical-align: top;
+}
+.songGroup {
+  color: #000000;
+  width: 100%;
+}
+.songGroupItem:hover {
+  color: #ffffff;
+  background-color: #005ba6;
+  cursor: pointer;
 }

@@ -3,7 +3,6 @@ import ReactDOMServer from 'react-dom/server';
 import SongNames from "./SongNames";
 import styles from "./SongLabels.module.css";
 import SongPicture from "./SongPicture";
-import SongGroup from "./SongGroup";
 import { fetchData, NOT_AVAILABLE, ZERO_RESULTS, getTasks } from "./common";
 
 const CATEGORY_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/labels/categories';
@@ -11,6 +10,7 @@ const LABELS_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/labels';
 const TASK_API_PREFIX_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + "/songs?";
 const GROUP1_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/songs/hymns/group1';
 const GROUPS_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/songs/hymns/groups';
+const GROUP2_SONGS_API_PREFIX_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + "/songs/group2-songs?group2Name=";
 
 const INVALID_CONDITIONS = "(请修改过滤标签)"
 const sleep = ms => new Promise(
@@ -32,9 +32,11 @@ class SongLabels extends React.Component {
             basic_labels:[],
             song_labels:[],
             selected_labels:[],
+            selected_group2: "",
             filter_labels:"",
             rearranged_labels:[],
-            query_result_song_names: ""
+            query_by_labels_result_song_names: "",
+            query_by_name_result_song_names: ""
         }
     }
     //请求接口的方法
@@ -92,26 +94,26 @@ class SongLabels extends React.Component {
                             resp = ZERO_RESULTS
                         }
                         this.setState({
-                            query_result_song_names: resp
+                            query_by_labels_result_song_names: resp
                         })
                     })
                     console.log("getTasks done")
                 } else {
                     songNames = INVALID_CONDITIONS
                     this.setState({
-                        query_result_song_names: songNames
+                        query_by_labels_result_song_names: songNames
                     })
                 }
             } else {
                 songNames = "(0 words selected.)"
                 this.setState({
-                    query_result_song_names: songNames
+                    query_by_labels_result_song_names: songNames
                 })
             }
         } else {
             songNames = "(selected label '" + zeroAnnotatedSong + "' has not been labeled by any Hymn.)"
             this.setState({
-                query_result_song_names: songNames
+                query_by_labels_result_song_names: songNames
             })
         }
     };
@@ -146,6 +148,13 @@ class SongLabels extends React.Component {
         this.state.rearranged_labels = this.rearrangeLabels()
         document.getElementById("hymnLabels").innerHTML = ReactDOMServer.renderToStaticMarkup(this.state.rearranged_labels)
     }
+    changeLabels=(event)=> {
+        let labelArray = Array.from(event.target.selectedOptions, option => option.value);
+        console.log("selected labels changed:" + labelArray)
+        // using setState will cause delay assignment and mismatched data
+        this.state.selected_labels = labelArray
+        this.queryByLabels()
+    }
 
     rearrangeLabels() {
         let doFilter = false;
@@ -155,7 +164,7 @@ class SongLabels extends React.Component {
         } else {
             console.log("filter label(s) is EMPTY")
         }
-        return <select name="keyLabels" multiple size={40} onChange={this.change}>
+        return <select name="keyLabels" multiple size={40} onChange={this.changeLabels}>
             {
                 this.state.basic_labels.map((basicLabel, key) => {
                     this.basicLabelsChildrenCount = 0
@@ -181,12 +190,51 @@ class SongLabels extends React.Component {
         </select>
     }
 
-    change=(event)=> {
-        let labelArray = Array.from(event.target.selectedOptions, option => option.value);
-        console.log("selected labels changed:" + labelArray)
+    queryByGroup2() {
+        console.log("queryByGroup2")
+        let songNames = NOT_AVAILABLE
+        if (this.state.selected_group2.length > 0) {
+            getTasks(GROUP2_SONGS_API_PREFIX_URL + this.state.selected_group2).then((resp) => {
+                console.log("resp:'" + resp + "'")
+                if (resp.trim().length === 0) {
+                    resp = ZERO_RESULTS
+                }
+                this.setState({
+                    query_by_labels_result_song_names: resp
+                })
+            })
+        } else {
+            songNames = "(0 words selected.)"
+            this.setState({
+                query_by_labels_result_song_names: songNames
+            })
+        }
+    };
+    getGroups() {
+        return <select className={styles.songGroup} name="keyGroups" size={40} onChange={this.changeGroup}>
+            {
+                this.state.hymns_group1.map((group1, key) => {
+                    return <optgroup key={key} label={group1}>
+                        {
+                            this.state.hymns_groups.map((groups, groupsKey) => {
+                                if (group1 === groups.group1) {
+                                    return <option className={styles.songGroupItem} key={groupsKey} value={groups.group2}>
+                                        {groups.group2}
+                                    </option>
+                                }
+                            })
+                        }
+                    </optgroup>
+                })
+            }
+        </select>
+    }
+    changeGroup=(event)=> {
+        let group = Array.from(event.target.selectedOptions, option => option.value);
+        console.log("selected group2 name changed:" + group)
         // using setState will cause delay assignment and mismatched data
-        this.state.selected_labels = labelArray
-        this.queryByLabels()
+        this.state.selected_group2 = group
+        this.queryByGroup2()
     }
     componentDidMount() {
         this.getBasicLabels().then(() => {
@@ -196,8 +244,12 @@ class SongLabels extends React.Component {
         })
 
         this.setBasicLabelsCount().then()
-        this.getSongGroup1().then()
-        this.getSongGroups().then()
+
+        this.getSongGroup1().then(() => {
+            this.getSongGroups().then(() => {
+                this.state.query_by_name_result_song_names = this.getGroups()
+            })
+        })
     }
     render() {
         console.log("rendering SongLabels")
@@ -206,10 +258,10 @@ class SongLabels extends React.Component {
                 <table className={styles.tbl}>
                     <tbody>
                     <tr>
-                        <td>过滤标签<br/>（多选按 ⌘ (Win:Ctrl）</td>
-                        <td>诗歌列表-{this.state.filter_labels.length}</td>
+                        <td>按标签过滤<br/>（多选按 ⌘ (Win:Ctrl）</td>
+                        <td>诗歌列表</td>
                         <td>谱/歌词/相关经文/作者</td>
-                        <td>过滤分组</td>
+                        <td>按组过滤</td>
                     </tr>
                     <tr>
                         <td className={styles.tdLabels}>
@@ -220,9 +272,15 @@ class SongLabels extends React.Component {
                                 }
                             </div>
                         </td>
-                        <td className={styles.tdNames}><SongNames token={this.props.token} songNames={this.state.query_result_song_names} /></td>
+                        <td className={styles.tdNames}><SongNames token={this.props.token} songNames={this.state.query_by_labels_result_song_names} /></td>
                         <td className={styles.tdPic}><SongPicture /></td>
-                        <td className={styles.tdGroup}><SongGroup hymnsGroup1={this.state.hymns_group1} hymnsGroups={this.state.hymns_groups} /></td>
+                        <td className={styles.tdGroup}>
+                            <div id="hymnGroups">
+                                {
+                                    this.state.query_by_name_result_song_names
+                                }
+                            </div>
+                        </td>
                     </tr>
                     </tbody>
                 </table>
