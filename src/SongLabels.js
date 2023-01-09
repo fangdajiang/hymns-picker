@@ -4,7 +4,7 @@ import SongNames from "./SongNames";
 import styles from "./SongLabels.module.css";
 import SongPicture from "./SongPicture";
 import SongGroup from "./SongGroup";
-import { fetchData, NOT_AVAILABLE, ZERO_RESULTS, INVALID_BACKEND } from "./common";
+import { fetchData, NOT_AVAILABLE, ZERO_RESULTS, getTasks } from "./common";
 
 const CATEGORY_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/labels/categories';
 const LABELS_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/labels';
@@ -38,30 +38,6 @@ class SongLabels extends React.Component {
         }
     }
     //请求接口的方法
-    async getTasks() {
-        let songNames = ""
-        let selectedLabelsArray = this.state.selected_labels
-        console.log("selectedLabelsArray:'" + selectedLabelsArray + "'")
-        if (selectedLabelsArray.length > 0) {
-            let selectedLabelsAsQueryString = ""
-            for (let index in selectedLabelsArray) {
-                selectedLabelsAsQueryString += "label=" + selectedLabelsArray[index] + "&"
-            }
-            let resp = await fetchData(TASK_API_PREFIX_URL + selectedLabelsAsQueryString);
-            if (undefined !== resp) {
-                for (let i in resp) {
-                    console.log("song name:'" + resp[i].nameCn + "'")
-                    songNames += resp[i].nameCn + ","
-                }
-            } else {
-                songNames = INVALID_BACKEND
-            }
-        } else {
-            songNames = INVALID_CONDITIONS
-        }
-        return songNames
-    }
-
     async getBasicLabels() {
         console.log("getting basic labels")
 
@@ -104,16 +80,28 @@ class SongLabels extends React.Component {
         console.log("zeroAnnotatedSong:'" + zeroAnnotatedSong + "'")
         if (zeroAnnotatedSong.trim().length === 0) {
             if (this.state.selected_labels.length > 0) {
-                this.getTasks().then((resp) => {
-                    console.log("resp:'" + resp + "'")
-                    if (resp.trim().length === 0) {
-                        resp = ZERO_RESULTS
+                console.log("this.state.selected_labels:'" + this.state.selected_labels + "'")
+                if (this.state.selected_labels.length > 0) {
+                    let selectedLabelsAsQueryString = ""
+                    for (let index in this.state.selected_labels) {
+                        selectedLabelsAsQueryString += "label=" + this.state.selected_labels[index] + "&"
                     }
-                    this.setState({
-                        query_result_song_names: resp
+                    getTasks(TASK_API_PREFIX_URL + selectedLabelsAsQueryString).then((resp) => {
+                        console.log("resp:'" + resp + "'")
+                        if (resp.trim().length === 0) {
+                            resp = ZERO_RESULTS
+                        }
+                        this.setState({
+                            query_result_song_names: resp
+                        })
                     })
-                })
-                console.log("getTasks done")
+                    console.log("getTasks done")
+                } else {
+                    songNames = INVALID_CONDITIONS
+                    this.setState({
+                        query_result_song_names: songNames
+                    })
+                }
             } else {
                 songNames = "(0 words selected.)"
                 this.setState({
