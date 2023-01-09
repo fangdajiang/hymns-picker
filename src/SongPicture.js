@@ -7,7 +7,7 @@ class SongPicture extends Component {
         super(props);
         this.state = {
             alt:"诗歌谱",
-            url:"http://localhost:3000/tlbc.png"
+            url:"./tlbc.png"
         }
     }
     render() {

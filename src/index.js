@@ -38,7 +38,7 @@ class Index extends React.Component {
                     <table className={styles.tbl}>
                         <tbody>
                         <tr>
-                            <td className={styles.caption}>TLBC 三分钟选歌 <font size = "4">(v0.1.0)</font>
+                            <td className={styles.caption}>TLBC 三分钟选歌 <font size = "4">(v0.4.0)</font>
                                 【诗歌总数：<span>{this.state.elastic_search_total_tasks_count}</span>
                                 ，已打标签诗歌：<span>{this.state.elastic_search_annotated_tasks_count}</span>】
                             </td>
