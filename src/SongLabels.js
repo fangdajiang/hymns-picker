@@ -35,8 +35,7 @@ class SongLabels extends React.Component {
             selected_group2: "",
             filter_labels:"",
             rearranged_labels:[],
-            query_by_labels_result_song_names: "",
-            query_by_name_result_song_names: ""
+            query_by_labels_result_song_names: ""
         }
     }
     //请求接口的方法
@@ -237,19 +236,17 @@ class SongLabels extends React.Component {
         this.queryByGroup2()
     }
     componentDidMount() {
-        this.getBasicLabels().then(() => {
-            this.getSongLabels().then(() => {
+        this.getSongLabels().then(() => {
+            this.getBasicLabels().then(() => {
                 this.state.rearranged_labels = this.rearrangeLabels()
+                this.setBasicLabelsCount().then()
             })
         })
 
-        this.setBasicLabelsCount().then()
-
-        this.getSongGroup1().then(() => {
-            this.getSongGroups().then(() => {
-                this.state.query_by_name_result_song_names = this.getGroups()
-            })
+        this.getSongGroups().then(() => {
+            this.getSongGroup1().then()
         })
+
     }
     render() {
         console.log("rendering SongLabels")
@@ -268,7 +265,7 @@ class SongLabels extends React.Component {
                             <input name="searchByLabel" placeholder="输入标签进行过滤" onChange={this.changeLabel} />
                             <div id="hymnLabels">
                                 {
-                                    this.state.rearranged_labels
+                                    this.rearrangeLabels()
                                 }
                             </div>
                         </td>
@@ -277,7 +274,7 @@ class SongLabels extends React.Component {
                         <td className={styles.tdGroup}>
                             <div id="hymnGroups">
                                 {
-                                    this.state.query_by_name_result_song_names
+                                    this.getGroups()
                                 }
                             </div>
                         </td>
