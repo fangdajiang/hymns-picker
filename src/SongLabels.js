@@ -145,6 +145,7 @@ class SongLabels extends React.Component {
     changeLabel=(event)=> {
         this.state.filter_labels = event.target.value
         this.state.rearranged_labels = this.rearrangeLabels()
+        // this will cause the loss of onChange event
         document.getElementById("hymnLabels").innerHTML = ReactDOMServer.renderToStaticMarkup(this.state.rearranged_labels)
     }
     changeLabels=(event)=> {
@@ -255,14 +256,14 @@ class SongLabels extends React.Component {
                 <table className={styles.tbl}>
                     <tbody>
                     <tr>
-                        <td>按标签过滤<br/>（多选按 ⌘ (Win:Ctrl）</td>
+                        <td>按标签过滤诗歌<br/>（多选按 ⌘ (Win:Ctrl）</td>
                         <td>诗歌列表</td>
                         <td>谱/歌词/相关经文/作者</td>
-                        <td>按组过滤</td>
+                        <td>按组过滤诗歌</td>
                     </tr>
                     <tr>
                         <td className={styles.tdLabels}>
-                            <input name="searchByLabel" placeholder="输入标签进行过滤" onChange={this.changeLabel} />
+                            <input name="searchByLabel" placeholder="查询标签" disabled onChange={this.changeLabel} />
                             <div id="hymnLabels">
                                 {
                                     this.rearrangeLabels()
