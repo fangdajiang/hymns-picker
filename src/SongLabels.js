@@ -13,14 +13,38 @@ const GROUPS_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/songs/hymns
 const GROUP2_SONGS_API_PREFIX_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + "/songs/group2-songs?group2Name=";
 
 const INVALID_CONDITIONS = "(请修改过滤标签)"
+const LABELS_SELECT_SIZE = 40
+const GROUPS_SELECT_SIZE = 40
 const sleep = ms => new Promise(
     resolve => setTimeout(resolve, ms)
 );
+
+function findZeroAnnotatedSong(annotatedSongs, selectedItems) {
+    let zeroAnnotations = ""
+    for (let annotatedSongsKey in annotatedSongs) {
+        for (let selectedItemsKey in selectedItems) {
+            if (annotatedSongs[annotatedSongsKey].annotatedItem === selectedItems[selectedItemsKey] &&
+                annotatedSongs[annotatedSongsKey].annotationsCount === 0) {
+                console.log("Found selected item with 0 annotations count:" + selectedItems[selectedItemsKey])
+                zeroAnnotations = selectedItems[selectedItemsKey]
+            }
+        }
+        if (zeroAnnotations !== "") {
+            break
+        }
+    }
+    return zeroAnnotations;
+}
+
 class SongLabels extends React.Component {
-    AnnotatedLabelSong = (annotatedLabel, annotationsCount) => {
-        return {annotatedLabel: annotatedLabel, annotationsCount: annotationsCount}
+    AnnotatedLabelSong = (annotatedItem, annotationsCount) => {
+        return {annotatedItem: annotatedItem, annotationsCount: annotationsCount}
     }
     annotatedLabelSongs = [this.AnnotatedLabelSong];
+    AnnotatedGroupSong = (annotatedItem, annotationsCount) => {
+        return {annotatedItem: annotatedItem, annotationsCount: annotationsCount}
+    }
+    annotatedGroupSongs = [this.AnnotatedGroupSong];
     //构造函数
     constructor(props) {
         super(props);
@@ -29,6 +53,7 @@ class SongLabels extends React.Component {
             hymns_group1:[],
             hymns_groups:[],
             basic_labels_children_count:[],
+            group1_children_count:[],
             basic_labels:[],
             song_labels:[],
             selected_labels:[],
@@ -60,24 +85,7 @@ class SongLabels extends React.Component {
         console.log("queryByLabels")
         let songNames = NOT_AVAILABLE
 
-        function findZeroAnnotatedLabelSong(annotatedLabelSongs, selectedLabels) {
-            let labelWithZeroAnnotations = ""
-            for (let annotatedLabelSongsKey in annotatedLabelSongs) {
-                for (let selectedLabelsKey in selectedLabels) {
-                    if (annotatedLabelSongs[annotatedLabelSongsKey].annotatedLabel === selectedLabels[selectedLabelsKey] &&
-                        annotatedLabelSongs[annotatedLabelSongsKey].annotationsCount === 0) {
-                        console.log("Found selected label with 0 annotations count:" + selectedLabels[selectedLabelsKey])
-                        labelWithZeroAnnotations = selectedLabels[selectedLabelsKey]
-                    }
-                }
-                if (labelWithZeroAnnotations !== "") {
-                    break
-                }
-            }
-            return labelWithZeroAnnotations;
-        }
-
-        let zeroAnnotatedLabelSong = findZeroAnnotatedLabelSong(this.annotatedLabelSongs, this.state.selected_labels);
+        let zeroAnnotatedLabelSong = findZeroAnnotatedSong(this.annotatedLabelSongs, this.state.selected_labels);
         console.log("zeroAnnotatedLabelSong:'" + zeroAnnotatedLabelSong + "'")
         if (zeroAnnotatedLabelSong.trim().length === 0) {
             if (this.state.selected_labels.length > 0) {
@@ -104,7 +112,7 @@ class SongLabels extends React.Component {
                     })
                 }
             } else {
-                songNames = "(0 words selected.)"
+                songNames = "(0 label selected.)"
                 this.setState({
                     query_by_labels_result_song_names: songNames
                 })
@@ -116,7 +124,7 @@ class SongLabels extends React.Component {
             })
         }
     };
-    async setBasicLabelsCount() {
+    async setOptGroupCount() {
         await sleep(2800);
         let bl0 = document.getElementById("bl0");
         if (bl0 != null) {
@@ -125,7 +133,16 @@ class SongLabels extends React.Component {
                 document.getElementById("bl" + i).setAttribute("label", optGroupLabel + "/" + this.state.basic_labels_children_count[i])
             }
         } else {
-            console.log("setBasicLabelsCount FAILED, bl0:" + bl0)
+            console.log("setOptGroupCount basic label FAILED, bl0:" + bl0)
+        }
+        let group0 = document.getElementById("group0");
+        if (group0 != null) {
+            for (let i = 0; i < this.state.hymns_group1.length; i++) {
+                let optGroupLabel = document.getElementById("group" + i).getAttribute("label")
+                document.getElementById("group" + i).setAttribute("label", optGroupLabel + "/" + this.state.group1_children_count[i])
+            }
+        } else {
+            console.log("setOptGroupCount group FAILED, group0:" + group0)
         }
     }
 
@@ -165,7 +182,7 @@ class SongLabels extends React.Component {
             console.log("filter label(s) is EMPTY")
         }
         let i = 0;
-        return <select id="keyLabels" multiple size={40} onChange={this.changeLabels}>
+        return <select id="keyLabels" multiple size={LABELS_SELECT_SIZE} onChange={this.changeLabels}>
             {
                 this.state.basic_labels.map((basicLabel, key) => {
                     this.basicLabelsChildrenCount = 0
@@ -175,9 +192,9 @@ class SongLabels extends React.Component {
                                 if ((!doFilter || categoryLabel.label.includes(this.state.filter_labels)) &&
                                     basicLabel === categoryLabel.category) {
                                     this.basicLabelsChildrenCount ++
-                                    this.annotatedLabelSongs[i++] = this.AnnotatedLabelSong(categoryLabel.label, categoryLabel.labelAnnotatedCount)
+                                    this.annotatedLabelSongs[i++] = this.AnnotatedLabelSong(categoryLabel.label, categoryLabel.annotatedLabelCount)
                                     return <option className={styles.labelItem} key={categoryLabelKey} value={categoryLabel.label}>
-                                        {categoryLabel.label}/{categoryLabel.labelAnnotatedCount}
+                                        {categoryLabel.label}/{categoryLabel.annotatedLabelCount}
                                     </option>
                                 }
                             })
@@ -193,38 +210,55 @@ class SongLabels extends React.Component {
     queryByGroup2() {
         console.log("queryByGroup2")
         let songNames = NOT_AVAILABLE
-        if (this.state.selected_group2.length > 0) {
-            getTasks(GROUP2_SONGS_API_PREFIX_URL + this.state.selected_group2).then((resp) => {
-                console.log("resp:'" + resp + "'")
-                if (resp.trim().length === 0) {
-                    resp = ZERO_RESULTS
-                }
-                this.setState({
-                    query_by_labels_result_song_names: resp
+
+        let zeroAnnotatedLabelSong = findZeroAnnotatedSong(this.annotatedGroupSongs, this.state.selected_group2);
+        console.log("zeroAnnotatedLabelSong:'" + zeroAnnotatedLabelSong + "'")
+
+        if (zeroAnnotatedLabelSong.trim().length === 0) {
+            if (this.state.selected_group2.length > 0) {
+                getTasks(GROUP2_SONGS_API_PREFIX_URL + this.state.selected_group2).then((resp) => {
+                    console.log("resp:'" + resp + "'")
+                    if (resp.trim().length === 0) {
+                        resp = ZERO_RESULTS
+                    }
+                    this.setState({
+                        query_by_labels_result_song_names: resp
+                    })
                 })
-            })
+            } else {
+                songNames = "(0 group selected.)"
+                this.setState({
+                    query_by_labels_result_song_names: songNames
+                })
+            }
         } else {
-            songNames = "(0 words selected.)"
+            songNames = "(selected group '" + zeroAnnotatedLabelSong + "' doesn't have any Hymn.)"
             this.setState({
                 query_by_labels_result_song_names: songNames
             })
         }
     };
     getGroups() {
-        return <select className={styles.songGroup} name="keyGroups" size={40} onChange={this.changeGroup}>
+        let i = 0;
+        return <select className={styles.songGroup} name="keyGroups" size={GROUPS_SELECT_SIZE} onChange={this.changeGroup}>
             {
                 this.state.hymns_group1.map((group1, key) => {
-                    return <optgroup key={key} label={group1}>
+                    this.group1ChildrenCount = 0
+                    let result = <optgroup key={key} id={"group" + key} label={group1}>
                         {
                             this.state.hymns_groups.map((groups, groupsKey) => {
                                 if (group1 === groups.group1) {
+                                    this.group1ChildrenCount ++
+                                    this.annotatedGroupSongs[i++] = this.AnnotatedGroupSong(groups.group2, groups.annotatedGroupCount)
                                     return <option className={styles.songGroupItem} key={groupsKey} value={groups.group2}>
-                                        {groups.group2}
+                                        {groups.group2}/{groups.annotatedGroupCount}
                                     </option>
                                 }
                             })
                         }
                     </optgroup>
+                    this.state.group1_children_count[key] = this.group1ChildrenCount
+                    return result
                 })
             }
         </select>
@@ -240,14 +274,13 @@ class SongLabels extends React.Component {
         this.getSongLabels().then(() => {
             this.getBasicLabels().then(() => {
                 this.state.rearranged_labels = this.rearrangeLabels()
-                this.setBasicLabelsCount().then()
+                this.getSongGroups().then(() => {
+                    this.getSongGroup1().then(() => {
+                        this.setOptGroupCount().then()
+                    })
+                })
             })
         })
-
-        this.getSongGroups().then(() => {
-            this.getSongGroup1().then()
-        })
-
     }
     render() {
         console.log("rendering SongLabels")
