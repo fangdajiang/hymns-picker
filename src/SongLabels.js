@@ -17,10 +17,10 @@ const sleep = ms => new Promise(
     resolve => setTimeout(resolve, ms)
 );
 class SongLabels extends React.Component {
-    AnnotatedSong = (annotatedLabel, annotationsCount) => {
+    AnnotatedLabelSong = (annotatedLabel, annotationsCount) => {
         return {annotatedLabel: annotatedLabel, annotationsCount: annotationsCount}
     }
-    annotatedSongs = [this.AnnotatedSong];
+    annotatedLabelSongs = [this.AnnotatedLabelSong];
     //构造函数
     constructor(props) {
         super(props);
@@ -60,12 +60,12 @@ class SongLabels extends React.Component {
         console.log("queryByLabels")
         let songNames = NOT_AVAILABLE
 
-        function findZeroAnnotatedSong(annotatedSongs, selectedLabels) {
+        function findZeroAnnotatedLabelSong(annotatedLabelSongs, selectedLabels) {
             let labelWithZeroAnnotations = ""
-            for (let annotatedSongsKey in annotatedSongs) {
+            for (let annotatedLabelSongsKey in annotatedLabelSongs) {
                 for (let selectedLabelsKey in selectedLabels) {
-                    if (annotatedSongs[annotatedSongsKey].annotatedLabel === selectedLabels[selectedLabelsKey] &&
-                        annotatedSongs[annotatedSongsKey].annotationsCount === 0) {
+                    if (annotatedLabelSongs[annotatedLabelSongsKey].annotatedLabel === selectedLabels[selectedLabelsKey] &&
+                        annotatedLabelSongs[annotatedLabelSongsKey].annotationsCount === 0) {
                         console.log("Found selected label with 0 annotations count:" + selectedLabels[selectedLabelsKey])
                         labelWithZeroAnnotations = selectedLabels[selectedLabelsKey]
                     }
@@ -77,9 +77,9 @@ class SongLabels extends React.Component {
             return labelWithZeroAnnotations;
         }
 
-        let zeroAnnotatedSong = findZeroAnnotatedSong(this.annotatedSongs, this.state.selected_labels);
-        console.log("zeroAnnotatedSong:'" + zeroAnnotatedSong + "'")
-        if (zeroAnnotatedSong.trim().length === 0) {
+        let zeroAnnotatedLabelSong = findZeroAnnotatedLabelSong(this.annotatedLabelSongs, this.state.selected_labels);
+        console.log("zeroAnnotatedLabelSong:'" + zeroAnnotatedLabelSong + "'")
+        if (zeroAnnotatedLabelSong.trim().length === 0) {
             if (this.state.selected_labels.length > 0) {
                 console.log("this.state.selected_labels:'" + this.state.selected_labels + "'")
                 if (this.state.selected_labels.length > 0) {
@@ -110,7 +110,7 @@ class SongLabels extends React.Component {
                 })
             }
         } else {
-            songNames = "(selected label '" + zeroAnnotatedSong + "' has not been labeled by any Hymn.)"
+            songNames = "(selected label '" + zeroAnnotatedLabelSong + "' has not been labeled by any Hymn.)"
             this.setState({
                 query_by_labels_result_song_names: songNames
             })
@@ -164,7 +164,8 @@ class SongLabels extends React.Component {
         } else {
             console.log("filter label(s) is EMPTY")
         }
-        return <select name="keyLabels" multiple size={40} onChange={this.changeLabels}>
+        let i = 0;
+        return <select id="keyLabels" multiple size={40} onChange={this.changeLabels}>
             {
                 this.state.basic_labels.map((basicLabel, key) => {
                     this.basicLabelsChildrenCount = 0
@@ -174,8 +175,7 @@ class SongLabels extends React.Component {
                                 if ((!doFilter || categoryLabel.label.includes(this.state.filter_labels)) &&
                                     basicLabel === categoryLabel.category) {
                                     this.basicLabelsChildrenCount ++
-                                    let i = 0;
-                                    this.annotatedSongs[i++] = this.AnnotatedSong(categoryLabel.label, categoryLabel.labelAnnotatedCount)
+                                    this.annotatedLabelSongs[i++] = this.AnnotatedLabelSong(categoryLabel.label, categoryLabel.labelAnnotatedCount)
                                     return <option className={styles.labelItem} key={categoryLabelKey} value={categoryLabel.label}>
                                         {categoryLabel.label}/{categoryLabel.labelAnnotatedCount}
                                     </option>

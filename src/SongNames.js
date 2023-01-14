@@ -75,7 +75,7 @@ class SongNames extends Component {
         return (
             <div>
                 <li>{this.state.name} {this.state.joy.coding}</li>
-                <li><input id="searchByName" placeholder="过滤歌名" onChange={this.changeName} /></li>
+                <li><input id="searchByName" placeholder="查询歌名" onChange={this.changeName} /></li>
                 <div id="hymnNames">
                     <MContext.Consumer>
                         {
