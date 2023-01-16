@@ -34,7 +34,6 @@ class SongNames extends Component {
                 if (undefined !== resp && 0 !== resp.length) {
                     console.log("found song names length:" + resp.length)
                     for (let i in resp) {
-                        console.log("song name:'" + resp[i].nameCn + "'")
                         songNames += resp[i].nameCn + ","
                     }
                 } else {

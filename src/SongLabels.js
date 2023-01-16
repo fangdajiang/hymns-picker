@@ -271,11 +271,12 @@ class SongLabels extends React.Component {
         this.queryByGroup2()
     }
     componentDidMount() {
-        this.getSongLabels().then(() => {
-            this.getBasicLabels().then(() => {
-                this.state.rearranged_labels = this.rearrangeLabels()
-                this.getSongGroups().then(() => {
-                    this.getSongGroup1().then(() => {
+        // to avoid loading groups failure on prod(local works!), groups must be run before labels
+        this.getSongGroups().then(() => {
+            this.getSongGroup1().then(() => {
+                this.getSongLabels().then(() => {
+                    this.getBasicLabels().then(() => {
+                        this.state.rearranged_labels = this.rearrangeLabels()
                         this.setOptGroupCount().then()
                     })
                 })
