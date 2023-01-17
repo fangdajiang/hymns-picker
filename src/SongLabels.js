@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import ReactDOMServer from 'react-dom/server';
 import SongNames from "./SongNames";
 import styles from "./SongLabels.module.css";
@@ -37,6 +37,14 @@ function findZeroAnnotatedSong(annotatedSongs, selectedItems) {
 }
 
 class SongLabels extends React.Component {
+    initScript = () => {
+        let script = document.createElement('script')
+        script.type = 'text/javascript'
+        script.async = true
+        script.src = './select2.full.min.js'
+        document.head.appendChild(script)
+    }
+
     AnnotatedLabelSong = (annotatedItem, annotationsCount) => {
         return {annotatedItem: annotatedItem, annotationsCount: annotationsCount}
     }
@@ -59,19 +67,43 @@ class SongLabels extends React.Component {
             selected_labels:[],
             selected_group2: "",
             filter_labels:"",
-            rearranged_labels:[],
+            rearranged_labels:"",
             query_by_labels_result_song_names: ""
         }
+        this.searchByLabel = React.createRef();
+        this.clearSearchByLabel = this.clearSearchByLabel.bind(this)
     }
+    clearSearchByLabel(event) {
+        if (event.key === "Escape" && this.searchByLabel.current.value.trim() !== ''){
+            this.searchByLabel.current.value = "";
+            this.updateData("")
+        }
+    }
+    changeSearchByLabel=(event)=> {
+        this.updateData(event.target.value)
+    }
+    changeLabels=(event)=> {
+        let labelArray = Array.from(event.target.selectedOptions, option => option.value);
+        console.log("selected labels changed:" + labelArray)
+        // using setState will cause delay assignment and mismatched data
+        this.state.selected_labels = labelArray
+        this.queryByLabels()
+    }
+    updateData(filterLabelsValue) {
+        this.state.filter_labels = filterLabelsValue
+        this.setState({
+            query_by_labels_result_song_names: "",
+            rearranged_labels: this.rearrangeLabels(),
+        })
+    }
+
     //请求接口的方法
     async getBasicLabels() {
         console.log("getting basic labels")
 
         let resp = await fetchData(CATEGORY_API_URL);
         console.log("basic labels:" + resp);
-        this.setState({
-            basic_labels:resp,
-        })
+        this.state.basic_labels = resp;
     }
     async getSongLabels() {
         console.log("getting song labels")
@@ -150,27 +182,15 @@ class SongLabels extends React.Component {
         console.log("getting song group1")
 
         let resp = await fetchData(GROUP1_API_URL);
+        console.log("song group1:" + resp);
         this.state.hymns_group1 = resp;
     }
     async getSongGroups() {
         console.log("getting song groups")
 
         let resp = await fetchData(GROUPS_API_URL);
+        console.log("song groups length:" + resp.length);
         this.state.hymns_groups = resp;
-    }
-
-    changeLabel=(event)=> {
-        this.state.filter_labels = event.target.value
-        this.state.rearranged_labels = this.rearrangeLabels()
-        // this will cause the loss of onChange event
-        document.getElementById("hymnLabels").innerHTML = ReactDOMServer.renderToStaticMarkup(this.state.rearranged_labels)
-    }
-    changeLabels=(event)=> {
-        let labelArray = Array.from(event.target.selectedOptions, option => option.value);
-        console.log("selected labels changed:" + labelArray)
-        // using setState will cause delay assignment and mismatched data
-        this.state.selected_labels = labelArray
-        this.queryByLabels()
     }
 
     rearrangeLabels() {
@@ -185,12 +205,14 @@ class SongLabels extends React.Component {
         return <select id="keyLabels" multiple size={LABELS_SELECT_SIZE} onChange={this.changeLabels}>
             {
                 this.state.basic_labels.map((basicLabel, key) => {
+                    // console.log("basicLabel:" + basicLabel)
                     this.basicLabelsChildrenCount = 0
                     let result = <optgroup key={key} id={"bl" + key} label={basicLabel}>
                         {
                             this.state.song_labels.map((categoryLabel, categoryLabelKey) => {
                                 if ((!doFilter || categoryLabel.label.includes(this.state.filter_labels)) &&
                                     basicLabel === categoryLabel.category) {
+                                    // console.log("categoryLabel.label:" + categoryLabel.label)
                                     this.basicLabelsChildrenCount ++
                                     this.annotatedLabelSongs[i++] = this.AnnotatedLabelSong(categoryLabel.label, categoryLabel.annotatedLabelCount)
                                     return <option className={styles.labelItem} key={categoryLabelKey} value={categoryLabel.label}>
@@ -297,10 +319,10 @@ class SongLabels extends React.Component {
                     </tr>
                     <tr>
                         <td className={styles.tdLabels}>
-                            <input name="searchByLabel" placeholder="查询标签" disabled onChange={this.changeLabel} />
+                            <input name="searchByLabel" placeholder="查找标签" ref={this.searchByLabel} onKeyUp={this.clearSearchByLabel} onChange={this.changeSearchByLabel} />
                             <div id="hymnLabels">
                                 {
-                                    this.rearrangeLabels()
+                                    this.state.rearranged_labels
                                 }
                             </div>
                         </td>

@@ -19,6 +19,15 @@ class SongNames extends Component {
                 coding:"Go!"
             }
         }
+        this.searchByName = React.createRef();
+        this.clearSearchByName = this.clearSearchByName.bind(this)
+    }
+    clearSearchByName(event) {
+        if (event.key === "Escape" && this.searchByName.current.value.trim() !== ''){
+            this.searchByName.current.value = "";
+            this.searchByName.current.focus();
+            this.clearResults("")
+        }
     }
     async findSongNames() {
         console.log("find song names")
@@ -74,7 +83,7 @@ class SongNames extends Component {
         return (
             <div>
                 <li>{this.state.name} {this.state.joy.coding}</li>
-                <li><input id="searchByName" placeholder="查询歌名" onChange={this.changeName} /></li>
+                <li><input id="searchByName" placeholder="查找歌名" ref={this.searchByName} onKeyUp={this.clearSearchByName} onChange={this.changeName} /></li>
                 <div id="hymnNames">
                     <MContext.Consumer>
                         {

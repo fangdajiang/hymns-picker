@@ -15,7 +15,7 @@ export async function getTasks(apiUrl) {
     let resp = await fetchData(apiUrl);
     if (undefined !== resp) {
         for (let i in resp) {
-            console.log("song name:'" + resp[i].nameCn + "'")
+            // console.log("song name:'" + resp[i].nameCn + "'")
             songNames += resp[i].nameCn + ","
         }
     } else {
