@@ -82,7 +82,7 @@ class SongNames extends Component {
         }
         return (
             <div>
-                <li>{this.state.name} {this.state.joy.coding}</li>
+                <li><span className={styles.helloGo}>{this.props.keyLabels}</span></li>
                 <li><input id="searchByName" placeholder="查找歌名" ref={this.searchByName} onKeyUp={this.clearSearchByName} onChange={this.changeName} /></li>
                 <div id="hymnNames">
                     <MContext.Consumer>

@@ -12,6 +12,7 @@ const GROUP1_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/songs/hymns
 const GROUPS_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/songs/hymns/groups';
 const GROUP2_SONGS_API_PREFIX_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + "/songs/group2-songs?group2Name=";
 
+const GO_GO_GO = "Warriors, Go!"
 const INVALID_CONDITIONS = "(请修改过滤标签)"
 const LABELS_SELECT_SIZE = 40
 const GROUPS_SELECT_SIZE = 40
@@ -26,11 +27,11 @@ function findZeroAnnotatedSong(annotatedSongs, selectedItems) {
             if (annotatedSongs[annotatedSongsKey].annotatedItem === selectedItems[selectedItemsKey] &&
                 annotatedSongs[annotatedSongsKey].annotationsCount === 0) {
                 console.log("Found selected item with 0 annotations count:" + selectedItems[selectedItemsKey])
-                zeroAnnotations = selectedItems[selectedItemsKey]
+                zeroAnnotations += selectedItems[selectedItemsKey] + " "
             }
         }
         if (zeroAnnotations !== "") {
-            break
+            // break
         }
     }
     return zeroAnnotations;
@@ -58,6 +59,7 @@ class SongLabels extends React.Component {
         super(props);
         //react定义数据
         this.state = {
+            key_labels_for_song_names: GO_GO_GO,
             hymns_group1:[],
             hymns_groups:[],
             basic_labels_children_count:[],
@@ -71,11 +73,20 @@ class SongLabels extends React.Component {
             query_by_labels_result_song_names: ""
         }
         this.searchByLabel = React.createRef();
+        this.keyLabels = React.createRef();
         this.clearSearchByLabel = this.clearSearchByLabel.bind(this)
     }
     clearSearchByLabel(event) {
-        if (event.key === "Escape" && this.searchByLabel.current.value.trim() !== ''){
-            this.searchByLabel.current.value = "";
+        if (event.key === "Escape") {
+            console.log("this.state.key_labels_for_song_names:" + this.state.key_labels_for_song_names)
+            this.state.key_labels_for_song_names = GO_GO_GO
+            if (this.searchByLabel.current.value.trim() !== '') {
+                this.searchByLabel.current.value = "";
+            }
+            let opts = document.getElementById("keyLabels").options;
+            for (let i = 0; i < opts.length; i++) {
+                opts[i].selected = false;
+            }
             this.updateData("")
         }
     }
@@ -87,6 +98,11 @@ class SongLabels extends React.Component {
         console.log("selected labels changed:" + labelArray)
         // using setState will cause delay assignment and mismatched data
         this.state.selected_labels = labelArray
+        let keyLabels = ""
+        for (let index in labelArray) {
+            keyLabels += labelArray[index] + " "
+        }
+        this.state.key_labels_for_song_names = keyLabels
         this.queryByLabels()
     }
     updateData(filterLabelsValue) {
@@ -202,7 +218,7 @@ class SongLabels extends React.Component {
             console.log("filter label(s) is EMPTY")
         }
         let i = 0;
-        return <select id="keyLabels" multiple size={LABELS_SELECT_SIZE} onChange={this.changeLabels}>
+        return <select id="keyLabels" multiple size={LABELS_SELECT_SIZE} ref={this.keyLabels} onKeyUp={this.clearSearchByLabel} onChange={this.changeLabels}>
             {
                 this.state.basic_labels.map((basicLabel, key) => {
                     // console.log("basicLabel:" + basicLabel)
@@ -326,7 +342,7 @@ class SongLabels extends React.Component {
                                 }
                             </div>
                         </td>
-                        <td className={styles.tdNames}><SongNames token={this.props.token} songNames={this.state.query_by_labels_result_song_names} /></td>
+                        <td className={styles.tdNames}><SongNames token={this.props.token} keyLabels={this.state.key_labels_for_song_names} songNames={this.state.query_by_labels_result_song_names} /></td>
                         <td className={styles.tdPic}><SongPicture /></td>
                         <td className={styles.tdGroup}>
                             <div id="hymnGroups">
