@@ -202,15 +202,6 @@ class SongLabels extends React.Component {
     }
 
     rearrangeLabels() {
-        return this.state.basic_labels.map((basicLabel, basicLabelKey) => {
-            return {
-                    label: basicLabel,
-                    options: this.getFlavourOptions(basicLabel),
-                    key: basicLabelKey
-                }
-        })
-    }
-    getFlavourOptions(thisBasicLabel) {
         let doFilter = false;
         if (this.state.filter_labels.trim().length > 0) {
             console.log("filter labels:" + this.state.filter_labels)
@@ -219,21 +210,30 @@ class SongLabels extends React.Component {
             console.log("filter label(s) is EMPTY")
         }
         let i = 0;
+        let basicLabels = [];
+        for (let basicLabelIndex in this.state.basic_labels) {
+            basicLabels.push({
+                label: this.state.basic_labels[basicLabelIndex],
+                options: this.getSongLabels(i, doFilter, this.state.basic_labels[basicLabelIndex])
+            })
+        }
+        return basicLabels
+    }
+    getSongLabels(i, doFilter, basicLabel) {
         this.basicLabelsChildrenCount = 0
-        return this.state.song_labels.map((categoryLabel, categoryLabelKey) => {
-            if ((!doFilter || categoryLabel.label.includes(this.state.filter_labels)) &&
-                thisBasicLabel === categoryLabel.category) {
+        let songLabels = [];
+        for (let categoryLabelIndex in this.state.song_labels) {
+            if ((!doFilter || this.state.song_labels[categoryLabelIndex].label.includes(this.state.filter_labels)) &&
+                basicLabel === this.state.song_labels[categoryLabelIndex].category) {
                 this.basicLabelsChildrenCount ++
-                this.annotatedLabelSongs[i++] = this.AnnotatedLabelSong(categoryLabel.label, categoryLabel.annotatedLabelCount)
-                return {
-                    value: categoryLabel.label,
-                    label: categoryLabel.label,
-                    key: categoryLabelKey
-                }
-            } else {
-                return {}
+                this.annotatedLabelSongs[i++] = this.AnnotatedLabelSong(this.state.song_labels[categoryLabelIndex].label, this.state.song_labels[categoryLabelIndex].annotatedLabelCount)
+                songLabels.push({
+                    value: this.state.song_labels[categoryLabelIndex].label,
+                    label: this.state.song_labels[categoryLabelIndex].label
+                })
             }
-        })
+        }
+        return songLabels
     }
     queryByGroup2() {
         console.log("queryByGroup2")
