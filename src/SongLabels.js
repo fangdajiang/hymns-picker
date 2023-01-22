@@ -13,12 +13,12 @@ const GROUPS_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/songs/hymns
 const GROUP2_SONGS_API_PREFIX_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + "/songs/group2-songs?group2Name=";
 
 const GO_GO_GO = "Warriors, Go!"
-const INVALID_CONDITIONS = "(请修改过滤标签)"
 const LABELS_SELECT_HEIGHT = 600
 const GROUPS_SELECT_SIZE = 40
 const sleep = ms => new Promise(
     resolve => setTimeout(resolve, ms)
 );
+let annotatedLabelSongsIndex = 0;
 
 function findZeroAnnotatedSong(annotatedSongs, selectedItems) {
     let zeroAnnotations = ""
@@ -64,40 +64,45 @@ class SongLabels extends React.Component {
             rearranged_labels:"",
             query_by_labels_result_song_names: ""
         }
-        this.searchByLabel = React.createRef();
-        this.keyLabels = React.createRef();
+        this.keyLabelRef = React.createRef();
         this.clearSearchByLabel = this.clearSearchByLabel.bind(this)
+    }
+    expandSongLabelSelect = () => {
+        if (!this.keyLabelRef.current) {
+            return;
+        }
+        this.keyLabelRef.current.onMenuOpen();
     }
     clearSearchByLabel(event) {
         if (event.key === "Escape") {
             console.log("this.state.key_labels_for_song_names:" + this.state.key_labels_for_song_names)
-            this.state.key_labels_for_song_names = GO_GO_GO
-            if (this.searchByLabel.current.value.trim() !== '') {
-                this.searchByLabel.current.value = "";
+            console.log("this.keyLabelRef:" + this.keyLabelRef.current.select)
+            if (this.keyLabelRef.current.value.trim() !== '') {
+                this.keyLabelRef.current.value = "";
             }
-            let opts = document.getElementById("keyLabels").options;
+            let opts = document.getElementById("keyLabelId").options;
+            console.log("opts:" + opts)
             for (let i = 0; i < opts.length; i++) {
                 opts[i].selected = false;
             }
-            this.updateData("")
+            this.rerenderSongLabelsAndNames("")
         }
     }
-    changeSearchByLabel=(event)=> {
-        this.updateData(event.target.value)
-    }
-    changeLabels=(event)=> {
-        let labelArray = Array.from(event.target.selectedOptions, option => option.value);
-        console.log("selected labels changed:" + labelArray)
-        // using setState will cause delay assignment and mismatched data
-        this.state.selected_labels = labelArray
-        let keyLabels = ""
-        for (let index in labelArray) {
-            keyLabels += labelArray[index] + " "
-        }
-        this.state.key_labels_for_song_names = keyLabels
-        this.queryByLabels()
-    }
-    updateData(filterLabelsValue) {
+    changeLabels = (selected_labels) => {
+        this.setState({ selected_labels }, () => {
+                console.log("Option selected length:", this.state.selected_labels.length)
+                let keyLabelStr = ""
+                for (let index in selected_labels) {
+                    keyLabelStr += selected_labels[index].value + " "
+                }
+                console.log("keyLabelStr:", keyLabelStr)
+                this.state.key_labels_for_song_names = keyLabelStr
+                this.queryByLabels()
+            }
+        );
+    };
+    rerenderSongLabelsAndNames(filterLabelsValue) {
+        this.state.key_labels_for_song_names = GO_GO_GO
         this.state.filter_labels = filterLabelsValue
         this.setState({
             query_by_labels_result_song_names: "",
@@ -125,32 +130,24 @@ class SongLabels extends React.Component {
         console.log("queryByLabels")
         let songNames = NOT_AVAILABLE
 
-        let zeroAnnotatedLabelSong = findZeroAnnotatedSong(this.annotatedLabelSongs, this.state.selected_labels);
+        let zeroAnnotatedLabelSong = findZeroAnnotatedSong(this.annotatedLabelSongs, this.state.selected_labels.value);
         console.log("zeroAnnotatedLabelSong:'" + zeroAnnotatedLabelSong + "'")
         if (zeroAnnotatedLabelSong.trim().length === 0) {
             if (this.state.selected_labels.length > 0) {
-                console.log("this.state.selected_labels:'" + this.state.selected_labels + "'")
-                if (this.state.selected_labels.length > 0) {
-                    let selectedLabelsAsQueryString = ""
-                    for (let index in this.state.selected_labels) {
-                        selectedLabelsAsQueryString += "label=" + this.state.selected_labels[index] + "&"
-                    }
-                    getTasks(TASK_API_PREFIX_URL + selectedLabelsAsQueryString).then((resp) => {
-                        console.log("resp:'" + resp + "'")
-                        if (resp.trim().length === 0) {
-                            resp = ZERO_RESULTS
-                        }
-                        this.setState({
-                            query_by_labels_result_song_names: resp
-                        })
-                    })
-                    console.log("getTasks done")
-                } else {
-                    songNames = INVALID_CONDITIONS
-                    this.setState({
-                        query_by_labels_result_song_names: songNames
-                    })
+                let selectedLabelsAsQueryString = ""
+                for (let index in this.state.selected_labels) {
+                    selectedLabelsAsQueryString += "label=" + this.state.selected_labels[index].value + "&"
                 }
+                getTasks(TASK_API_PREFIX_URL + selectedLabelsAsQueryString).then((resp) => {
+                    console.log("resp:'" + resp + "'")
+                    if (resp.trim().length === 0) {
+                        resp = ZERO_RESULTS
+                    }
+                    this.setState({
+                        query_by_labels_result_song_names: resp
+                    })
+                })
+                console.log("getTasks done")
             } else {
                 songNames = "(0 label selected.)"
                 this.setState({
@@ -166,15 +163,6 @@ class SongLabels extends React.Component {
     };
     async setOptGroupCount() {
         await sleep(2800);
-        let bl0 = document.getElementById("bl0");
-        if (bl0 != null) {
-            for (let i = 0; i < this.state.basic_labels.length; i++) {
-                let optGroupLabel = document.getElementById("bl" + i).getAttribute("label")
-                document.getElementById("bl" + i).setAttribute("label", optGroupLabel + "/" + this.state.basic_labels_children_count[i])
-            }
-        } else {
-            console.log("setOptGroupCount basic label FAILED, bl0:" + bl0)
-        }
         let group0 = document.getElementById("group0");
         if (group0 != null) {
             for (let i = 0; i < this.state.hymns_group1.length; i++) {
@@ -209,30 +197,32 @@ class SongLabels extends React.Component {
         } else {
             console.log("filter label(s) is EMPTY")
         }
-        let i = 0;
         let basicLabels = [];
         for (let basicLabelIndex in this.state.basic_labels) {
+            let labelsOption = this.getSongLabels(doFilter, basicLabelIndex)
             basicLabels.push({
-                label: this.state.basic_labels[basicLabelIndex],
-                options: this.getSongLabels(i, doFilter, this.state.basic_labels[basicLabelIndex])
+                label: this.state.basic_labels[basicLabelIndex] + "/" + this.state.basic_labels_children_count[basicLabelIndex],
+                options: labelsOption
             })
         }
         return basicLabels
     }
-    getSongLabels(i, doFilter, basicLabel) {
+    getSongLabels(doFilter, basicLabelIndex) {
         this.basicLabelsChildrenCount = 0
         let songLabels = [];
         for (let categoryLabelIndex in this.state.song_labels) {
             if ((!doFilter || this.state.song_labels[categoryLabelIndex].label.includes(this.state.filter_labels)) &&
-                basicLabel === this.state.song_labels[categoryLabelIndex].category) {
+                this.state.basic_labels[basicLabelIndex] === this.state.song_labels[categoryLabelIndex].category) {
                 this.basicLabelsChildrenCount ++
-                this.annotatedLabelSongs[i++] = this.AnnotatedLabelSong(this.state.song_labels[categoryLabelIndex].label, this.state.song_labels[categoryLabelIndex].annotatedLabelCount)
+                this.annotatedLabelSongs[annotatedLabelSongsIndex++] = this.AnnotatedLabelSong(this.state.song_labels[categoryLabelIndex].label, this.state.song_labels[categoryLabelIndex].annotatedLabelCount)
                 songLabels.push({
                     value: this.state.song_labels[categoryLabelIndex].label,
-                    label: this.state.song_labels[categoryLabelIndex].label
+                    label: this.state.song_labels[categoryLabelIndex].label + "/" +
+                        this.state.song_labels[categoryLabelIndex].annotatedLabelCount
                 })
             }
         }
+        this.state.basic_labels_children_count[basicLabelIndex] = this.basicLabelsChildrenCount
         return songLabels
     }
     queryByGroup2() {
@@ -296,6 +286,7 @@ class SongLabels extends React.Component {
         console.log("selected group2 name changed:" + group)
         // using setState will cause delay assignment and mismatched data
         this.state.selected_group2 = group
+        this.rerenderSongLabelsAndNames("")
         this.queryByGroup2()
     }
     componentDidMount() {
@@ -305,30 +296,24 @@ class SongLabels extends React.Component {
                 this.querySongLabels().then(() => {
                     this.queryBasicLabels().then(() => {
                         this.state.rearranged_labels = this.getLabelsSelect()
-                        // this.setOptGroupCount().then()
+                        this.setOptGroupCount().then(() => {
+                            this.expandSongLabelSelect()
+                        })
                     })
                 })
             })
         })
     }
-    state = {
-        selectedOption: null
-    };
-    handleChange = (selectedOption) => {
-        this.setState({ selectedOption }, () =>
-            console.log("Option selected:", this.state.selectedOption)
-        );
-    };
     getLabelsSelect() {
         const { selectedOption } = this.state;
         return <Select
-            id="keyLabels"
+            id="keyLabelId"
             isMulti
             maxMenuHeight={LABELS_SELECT_HEIGHT}
-            ref={this.keyLabels}
+            ref={this.keyLabelRef}
             onKeyDown={this.clearSearchByLabel}
             value={selectedOption}
-            onChange={this.handleChange}
+            onChange={this.changeLabels}
             options={this.rearrangeLabels()}
         />
     }
@@ -346,7 +331,6 @@ class SongLabels extends React.Component {
                     </tr>
                     <tr>
                         <td className={styles.tdLabels}>
-                            <input name="searchByLabel" placeholder="查找标签" ref={this.searchByLabel} onKeyUp={this.clearSearchByLabel} onChange={this.changeSearchByLabel} />
                             <div id="hymnLabels">
                                 {
                                     this.state.rearranged_labels
