@@ -21,13 +21,28 @@ const sleep = ms => new Promise(
 let annotatedLabelSongsIndex = 0;
 
 function findZeroAnnotatedSong(annotatedSongs, selectedItems) {
+    console.log("annotatedSongs.length:", annotatedSongs.length, ", selectedItems.length:", selectedItems.length)
     let zeroAnnotations = ""
+
+    // to be improved
+    let byGroup = false;
+    if (!selectedItems[0].value) {
+        byGroup = true;
+    }
+
     for (let annotatedSongsKey in annotatedSongs) {
         for (let selectedItemsKey in selectedItems) {
-            if (annotatedSongs[annotatedSongsKey].annotatedItem === selectedItems[selectedItemsKey] &&
+            let selectedItemValue = selectedItems[selectedItemsKey].value
+
+            // to be improved
+            if (byGroup) {
+                selectedItemValue = selectedItems[selectedItemsKey]
+            }
+
+            if (annotatedSongs[annotatedSongsKey].annotatedItem === selectedItemValue &&
                 annotatedSongs[annotatedSongsKey].annotationsCount === 0) {
-                console.log("Found selected item with 0 annotations count:" + selectedItems[selectedItemsKey])
-                zeroAnnotations += selectedItems[selectedItemsKey] + " "
+                console.log("Found selected item with 0 annotations count:" + selectedItemValue)
+                zeroAnnotations += selectedItemValue + " "
             }
         }
         if (zeroAnnotations !== "") {
@@ -60,12 +75,11 @@ class SongLabels extends React.Component {
             song_labels:[],
             selected_labels:[],
             selected_group2: "",
-            filter_labels:"",
             rearranged_labels:"",
             query_by_labels_result_song_names: ""
         }
         this.keyLabelRef = React.createRef();
-        this.clearSearchByLabel = this.clearSearchByLabel.bind(this)
+        this.clearSongLabelSelect = this.clearSongLabelSelect.bind(this)
     }
     expandSongLabelSelect = () => {
         if (!this.keyLabelRef.current) {
@@ -73,19 +87,11 @@ class SongLabels extends React.Component {
         }
         this.keyLabelRef.current.onMenuOpen();
     }
-    clearSearchByLabel(event) {
+    clearSongLabelSelect(event) {
         if (event.key === "Escape") {
             console.log("this.state.key_labels_for_song_names:" + this.state.key_labels_for_song_names)
-            console.log("this.keyLabelRef:" + this.keyLabelRef.current.select)
-            if (this.keyLabelRef.current.value.trim() !== '') {
-                this.keyLabelRef.current.value = "";
-            }
-            let opts = document.getElementById("keyLabelId").options;
-            console.log("opts:" + opts)
-            for (let i = 0; i < opts.length; i++) {
-                opts[i].selected = false;
-            }
-            this.rerenderSongLabelsAndNames("")
+            this.keyLabelRef.current.clearValue()
+            this.rerenderSongLabelsAndNames()
         }
     }
     changeLabels = (selected_labels) => {
@@ -98,15 +104,14 @@ class SongLabels extends React.Component {
                 console.log("keyLabelStr:", keyLabelStr)
                 this.state.key_labels_for_song_names = keyLabelStr
                 this.queryByLabels()
+                this.expandSongLabelSelect()
             }
         );
     };
-    rerenderSongLabelsAndNames(filterLabelsValue) {
+    rerenderSongLabelsAndNames() {
         this.state.key_labels_for_song_names = GO_GO_GO
-        this.state.filter_labels = filterLabelsValue
         this.setState({
             query_by_labels_result_song_names: "",
-            rearranged_labels: this.rearrangeLabels(),
         })
     }
 
@@ -130,7 +135,7 @@ class SongLabels extends React.Component {
         console.log("queryByLabels")
         let songNames = NOT_AVAILABLE
 
-        let zeroAnnotatedLabelSong = findZeroAnnotatedSong(this.annotatedLabelSongs, this.state.selected_labels.value);
+        let zeroAnnotatedLabelSong = findZeroAnnotatedSong(this.annotatedLabelSongs, this.state.selected_labels);
         console.log("zeroAnnotatedLabelSong:'" + zeroAnnotatedLabelSong + "'")
         if (zeroAnnotatedLabelSong.trim().length === 0) {
             if (this.state.selected_labels.length > 0) {
@@ -190,16 +195,16 @@ class SongLabels extends React.Component {
     }
 
     rearrangeLabels() {
-        let doFilter = false;
-        if (this.state.filter_labels.trim().length > 0) {
-            console.log("filter labels:" + this.state.filter_labels)
-            doFilter = true;
-        } else {
-            console.log("filter label(s) is EMPTY")
-        }
+        // let doFilter = false;
+        // if (this.state.filter_labels.trim().length > 0) {
+        //     console.log("filter labels:" + this.state.filter_labels)
+        //     doFilter = true;
+        // } else {
+        //     console.log("filter label(s) is EMPTY")
+        // }
         let basicLabels = [];
         for (let basicLabelIndex in this.state.basic_labels) {
-            let labelsOption = this.getSongLabels(doFilter, basicLabelIndex)
+            let labelsOption = this.getSongLabels(basicLabelIndex)
             basicLabels.push({
                 label: this.state.basic_labels[basicLabelIndex] + "/" + this.state.basic_labels_children_count[basicLabelIndex],
                 options: labelsOption
@@ -207,12 +212,11 @@ class SongLabels extends React.Component {
         }
         return basicLabels
     }
-    getSongLabels(doFilter, basicLabelIndex) {
+    getSongLabels(basicLabelIndex) {
         this.basicLabelsChildrenCount = 0
         let songLabels = [];
         for (let categoryLabelIndex in this.state.song_labels) {
-            if ((!doFilter || this.state.song_labels[categoryLabelIndex].label.includes(this.state.filter_labels)) &&
-                this.state.basic_labels[basicLabelIndex] === this.state.song_labels[categoryLabelIndex].category) {
+            if (this.state.basic_labels[basicLabelIndex] === this.state.song_labels[categoryLabelIndex].category) {
                 this.basicLabelsChildrenCount ++
                 this.annotatedLabelSongs[annotatedLabelSongsIndex++] = this.AnnotatedLabelSong(this.state.song_labels[categoryLabelIndex].label, this.state.song_labels[categoryLabelIndex].annotatedLabelCount)
                 songLabels.push({
@@ -286,8 +290,9 @@ class SongLabels extends React.Component {
         console.log("selected group2 name changed:" + group)
         // using setState will cause delay assignment and mismatched data
         this.state.selected_group2 = group
-        this.rerenderSongLabelsAndNames("")
+        this.rerenderSongLabelsAndNames()
         this.queryByGroup2()
+        this.expandSongLabelSelect()
     }
     componentDidMount() {
         // to avoid loading groups failure on prod(local works!), groups must be run before labels
@@ -308,10 +313,11 @@ class SongLabels extends React.Component {
         const { selectedOption } = this.state;
         return <Select
             id="keyLabelId"
+            placeholder="查找标签"
             isMulti
             maxMenuHeight={LABELS_SELECT_HEIGHT}
             ref={this.keyLabelRef}
-            onKeyDown={this.clearSearchByLabel}
+            onKeyDown={this.clearSongLabelSelect}
             value={selectedOption}
             onChange={this.changeLabels}
             options={this.rearrangeLabels()}
