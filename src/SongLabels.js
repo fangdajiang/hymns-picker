@@ -107,6 +107,7 @@ class SongLabels extends React.Component {
                     this.state.key_source = LABEL_SOURCE
                     this.queryByLabels()
                 } else {
+                    this.state.key_source = ""
                     this.state.key_for_song_names = GO_GO_GO
                     this.setState({
                         query_by_labels_result_song_names: "",
