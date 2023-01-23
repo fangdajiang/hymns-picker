@@ -1,5 +1,5 @@
 import React from 'react';
-import Select from "react-select";
+import Select, { components } from "react-select";
 import SongNames from "./SongNames";
 import styles from "./SongLabels.module.css";
 import SongPicture from "./SongPicture";
@@ -12,6 +12,8 @@ const GROUP1_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/songs/hymns
 const GROUPS_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/songs/hymns/groups';
 const GROUP2_SONGS_API_PREFIX_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + "/songs/group2-songs?group2Name=";
 
+const LABEL_SOURCE = "标签："
+const GROUP_SOURCE = "组："
 const GO_GO_GO = "Warriors, Go!"
 const LABELS_SELECT_HEIGHT = 600
 const GROUPS_SELECT_SIZE = 40
@@ -66,7 +68,8 @@ class SongLabels extends React.Component {
         super(props);
         //react定义数据
         this.state = {
-            key_labels_for_song_names: GO_GO_GO,
+            key_source: "",
+            key_for_song_names: GO_GO_GO,
             hymns_group1:[],
             hymns_groups:[],
             basic_labels_children_count:[],
@@ -81,39 +84,37 @@ class SongLabels extends React.Component {
         this.keyLabelRef = React.createRef();
         this.clearSongLabelSelect = this.clearSongLabelSelect.bind(this)
     }
-    expandSongLabelSelect = () => {
-        if (!this.keyLabelRef.current) {
-            return;
-        }
-        this.keyLabelRef.current.onMenuOpen();
-    }
     clearSongLabelSelect(event) {
         if (event.key === "Escape") {
-            console.log("this.state.key_labels_for_song_names:" + this.state.key_labels_for_song_names)
+            console.log("this.state.key_for_song_names:" + this.state.key_for_song_names)
             this.keyLabelRef.current.clearValue()
-            this.rerenderSongLabelsAndNames()
+            this.state.key_for_song_names = GO_GO_GO
+            this.setState({
+                query_by_labels_result_song_names: "",
+            })
         }
     }
     changeLabels = (selected_labels) => {
         this.setState({ selected_labels }, () => {
                 console.log("Option selected length:", this.state.selected_labels.length)
-                let keyLabelStr = ""
-                for (let index in selected_labels) {
-                    keyLabelStr += selected_labels[index].value + " "
+                if (this.state.selected_labels.length > 0) {
+                    let keyLabelStr = ""
+                    for (let index in selected_labels) {
+                        keyLabelStr += selected_labels[index].value + " "
+                    }
+                    console.log("keyLabelStr:", keyLabelStr)
+                    this.state.key_for_song_names = keyLabelStr
+                    this.state.key_source = LABEL_SOURCE
+                    this.queryByLabels()
+                } else {
+                    this.state.key_for_song_names = GO_GO_GO
+                    this.setState({
+                        query_by_labels_result_song_names: "",
+                    })
                 }
-                console.log("keyLabelStr:", keyLabelStr)
-                this.state.key_labels_for_song_names = keyLabelStr
-                this.queryByLabels()
-                this.expandSongLabelSelect()
             }
         );
     };
-    rerenderSongLabelsAndNames() {
-        this.state.key_labels_for_song_names = GO_GO_GO
-        this.setState({
-            query_by_labels_result_song_names: "",
-        })
-    }
 
     //请求接口的方法
     async queryBasicLabels() {
@@ -195,13 +196,6 @@ class SongLabels extends React.Component {
     }
 
     rearrangeLabels() {
-        // let doFilter = false;
-        // if (this.state.filter_labels.trim().length > 0) {
-        //     console.log("filter labels:" + this.state.filter_labels)
-        //     doFilter = true;
-        // } else {
-        //     console.log("filter label(s) is EMPTY")
-        // }
         let basicLabels = [];
         for (let basicLabelIndex in this.state.basic_labels) {
             let labelsOption = this.getSongLabels(basicLabelIndex)
@@ -290,9 +284,9 @@ class SongLabels extends React.Component {
         console.log("selected group2 name changed:" + group)
         // using setState will cause delay assignment and mismatched data
         this.state.selected_group2 = group
-        this.rerenderSongLabelsAndNames()
+        this.state.key_for_song_names = group
+        this.state.key_source = GROUP_SOURCE
         this.queryByGroup2()
-        this.expandSongLabelSelect()
     }
     componentDidMount() {
         // to avoid loading groups failure on prod(local works!), groups must be run before labels
@@ -301,27 +295,53 @@ class SongLabels extends React.Component {
                 this.querySongLabels().then(() => {
                     this.queryBasicLabels().then(() => {
                         this.state.rearranged_labels = this.getLabelsSelect()
-                        this.setOptGroupCount().then(() => {
-                            this.expandSongLabelSelect()
-                        })
+                        this.setOptGroupCount().then()
                     })
                 })
             })
         })
     }
     getLabelsSelect() {
+        // handle options group header click event
+        // hide and show the options under clicked group
+        const handleHeaderClick = id => {
+            const node = document.querySelector(`#${id}`).parentElement.nextElementSibling;
+            const classes = node.classList;
+            if (classes.contains("collapsed")) {
+                node.classList.remove("collapsed");
+            } else {
+                node.classList.add("collapsed");
+            }
+        };
+        // Create custom GroupHeading component, which will wrap
+        // react-select GroupHeading component inside a div and
+        // register onClick event on that div
+        const CustomGroupHeading = props => {
+            return (
+                <div
+                    className="group-heading-wrapper"
+                    onClick={() => handleHeaderClick(props.id)}
+                >
+                    <components.GroupHeading {...props} />
+                </div>
+            );
+        };
         const { selectedOption } = this.state;
-        return <Select
-            id="keyLabelId"
-            placeholder="查找标签"
-            isMulti
-            maxMenuHeight={LABELS_SELECT_HEIGHT}
-            ref={this.keyLabelRef}
-            onKeyDown={this.clearSongLabelSelect}
-            value={selectedOption}
-            onChange={this.changeLabels}
-            options={this.rearrangeLabels()}
-        />
+        return <div className={styles.container}>
+            <Select
+                id="keyLabelId"
+                placeholder="查找标签"
+                isMulti
+                menuIsOpen
+                maxMenuHeight={LABELS_SELECT_HEIGHT}
+                ref={this.keyLabelRef}
+                onKeyDown={this.clearSongLabelSelect}
+                value={selectedOption}
+                onChange={this.changeLabels}
+                options={this.rearrangeLabels()}
+                components={{ GroupHeading: CustomGroupHeading }}
+            />
+        </div>
     }
     render() {
         console.log("rendering SongLabels")
@@ -343,7 +363,7 @@ class SongLabels extends React.Component {
                                 }
                             </div>
                         </td>
-                        <td className={styles.tdNames}><SongNames token={this.props.token} keyLabels={this.state.key_labels_for_song_names} songNames={this.state.query_by_labels_result_song_names} /></td>
+                        <td className={styles.tdNames}><SongNames token={this.props.token} keySource={this.state.key_source} keyLabels={this.state.key_for_song_names} songNames={this.state.query_by_labels_result_song_names} /></td>
                         <td className={styles.tdPic}><SongPicture /></td>
                         <td className={styles.tdGroup}>
                             <div id="hymnGroups">

@@ -78,11 +78,6 @@ class Index extends React.Component {
 }
 const root = createRoot(document.getElementById("root"));
 root.render(<Index />);
-// ReactDOM.hydrateRoot(
-//     document.getElementById('root'),
-//     <Index />
-// )
-// ReactDOM.render(<Index/>, document.getElementById("root"));
 
 export const MContext = React.createContext(null);
 class MyProvider extends React.Component {

@@ -1,4 +1,10 @@
-
+.collapsed {
+  display: none;
+}
+.container {
+  margin: 0 auto auto;
+  width: 100%;
+}
 .tbl {
   width: 100%;
   horiz-align: right;
