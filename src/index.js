@@ -2,10 +2,8 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import styles from './index.module.css';
 import SongLabels from './SongLabels';
-import { fetchData } from './common'
 
 const TOKEN = process.env.REACT_APP_HYMNS_PICKER_TOKEN
-const ELASTIC_SEARCH_SUMMARY_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/songs/summary';
 
 class Index extends React.Component {
     //构造函数
@@ -13,23 +11,10 @@ class Index extends React.Component {
         super(props);
         //react定义数据
         this.state = {
-            elastic_search_total_tasks_count:"?",
-            elastic_search_annotated_tasks_count:"?",
-            song_summary_annotation_count:"?",
             token:""
         }
     }
     componentDidMount() {
-        this.getElasticSearchSummary().then();
-    }
-    async getElasticSearchSummary() {
-        console.log("getting elastic search summary")
-        let resp = await fetchData(ELASTIC_SEARCH_SUMMARY_API_URL);
-        console.log("elastic search total number: " + resp.totalNumber + ", elastic search annotation count: " + resp.annotationCount);
-        this.setState({
-            elastic_search_total_tasks_count:resp.totalNumber,
-            elastic_search_annotated_tasks_count:resp.annotationCount,
-        })
     }
     render() {
         return (
@@ -38,9 +23,8 @@ class Index extends React.Component {
                     <table className={styles.tbl}>
                         <tbody>
                         <tr>
-                            <td className={styles.caption}>TLBC 三分钟选歌 <font size = "4">(v0.5.0)</font>
-                                【诗歌总数：<span>{this.state.elastic_search_total_tasks_count}</span>
-                                ，已打标签诗歌：<span>{this.state.elastic_search_annotated_tasks_count}</span>】
+                            <td className={styles.caption}>
+                                TLBC 三分钟选歌 <font size = "4">(v0.5.0)</font>
                             </td>
                         </tr>
                         <tr>
