@@ -70,11 +70,12 @@ class SongLabels extends React.Component {
         //react定义数据
         this.state = {
             key_source: "",
-            key_for_song_names: GO_GO_GO,
+            key_items_for_song_names: GO_GO_GO,
             basic_labels:[],
             song_labels:[],
             selected_labels:[],
-            rearranged_labels:"",
+            labels_select:"",
+            groups_select:"",
             basic_labels_children_count:[],
             hymns_group1:[],
             hymns_groups:[],
@@ -89,9 +90,9 @@ class SongLabels extends React.Component {
     }
     clearSongLabelSelect(event) {
         if (event.key === "Escape") {
-            console.log("this.state.key_for_song_names:" + this.state.key_for_song_names)
+            console.log("this.state.key_items_for_song_names:" + this.state.key_items_for_song_names)
             this.keyLabelRef.current.clearValue()
-            this.state.key_for_song_names = GO_GO_GO
+            this.state.key_items_for_song_names = GO_GO_GO
             this.setState({
                 query_by_labels_result_song_names: "",
             })
@@ -106,12 +107,10 @@ class SongLabels extends React.Component {
                         keyLabelStr += selected_labels[index].value + " "
                     }
                     console.log("keyLabelStr:", keyLabelStr)
-                    this.state.key_for_song_names = keyLabelStr
+                    this.state.key_items_for_song_names = keyLabelStr
                     this.state.key_source = LABEL_SOURCE
                     this.queryByLabels()
                 } else {
-                    this.state.key_source = ""
-                    this.state.key_for_song_names = GO_GO_GO
                     this.setState({
                         query_by_labels_result_song_names: "",
                     })
@@ -184,11 +183,11 @@ class SongLabels extends React.Component {
             })
         }
     };
-    rearrangeLabels() {
-        console.log("rearrangeLabels")
+    getLabelsOptions() {
+        console.log("getLabelsOptions")
         let basicLabels = [];
         for (let basicLabelIndex in this.state.basic_labels) {
-            let labelsOption = this.getSongLabels(basicLabelIndex)
+            let labelsOption = this.assembleLabelGroups(basicLabelIndex)
             basicLabels.push({
                 label: this.state.basic_labels[basicLabelIndex] + "/" + this.state.basic_labels_children_count[basicLabelIndex],
                 options: labelsOption
@@ -196,8 +195,8 @@ class SongLabels extends React.Component {
         }
         return basicLabels
     }
-    getSongLabels(basicLabelIndex) {
-        console.log("getSongLabels")
+    assembleLabelGroups(basicLabelIndex) {
+        console.log("assembleLabelGroups")
         this.basicLabelsChildrenCount = 0
         let songLabels = [];
         for (let categoryLabelIndex in this.state.song_labels) {
@@ -252,7 +251,7 @@ class SongLabels extends React.Component {
                 onKeyDown={this.clearSongLabelSelect}
                 value={selectedOption}
                 onChange={this.changeLabels}
-                options={this.rearrangeLabels()}
+                options={this.getLabelsOptions()}
                 components={{ GroupHeading: CustomGroupHeading }}
             />
         </div>
@@ -303,8 +302,8 @@ class SongLabels extends React.Component {
             })
         }
     };
-    getGroups() {
-        console.log("getGroups")
+    getGroupsSelect() {
+        console.log("getGroupsSelect")
         let i = 0;
         return <select className={styles.songGroup} name="keyGroups" size={GROUPS_SELECT_SIZE} onChange={this.changeGroup}>
             {
@@ -345,9 +344,10 @@ class SongLabels extends React.Component {
         console.log("selected group2 name changed:" + group)
         // using setState will cause delay assignment and mismatched data
         this.state.selected_group2 = group
-        this.state.key_for_song_names = group
+        this.state.key_items_for_song_names = group
         this.state.key_source = GROUP_SOURCE
         this.queryByGroup2()
+        this.keyLabelRef.current.clearValue()
     }
     componentDidMount() {
         // to avoid loading groups failure on prod(local works!), groups must be run before labels
@@ -355,8 +355,9 @@ class SongLabels extends React.Component {
             this.querySongGroup1().then(() => {
                 this.querySongLabels().then(() => {
                     this.queryBasicLabels().then(() => {
-                        this.state.rearranged_labels = this.getLabelsSelect()
+                        this.state.labels_select = this.getLabelsSelect()
                         this.queryElasticSearchSummary().then(() => {
+                            this.state.groups_select = this.getGroupsSelect()
                             this.setOptGroupCount().then()
                         });
                     })
@@ -372,7 +373,7 @@ class SongLabels extends React.Component {
                     <tbody>
                     <tr>
                         <td>按标签过滤诗歌</td>
-                        <td>诗歌列表<br/>【诗歌总数：<span title={"已打标签：" + this.state.elastic_search_annotated_tasks_count}>{this.state.elastic_search_total_tasks_count}</span>】</td>
+                        <td>诗歌列表【总数：<span title={"已打标签：" + this.state.elastic_search_annotated_tasks_count}>{this.state.elastic_search_total_tasks_count}</span>】</td>
                         <td>谱/歌词/相关经文/作者</td>
                         <td>按组过滤诗歌</td>
                     </tr>
@@ -380,16 +381,16 @@ class SongLabels extends React.Component {
                         <td className={styles.tdLabels}>
                             <div id="hymnLabels">
                                 {
-                                    this.state.rearranged_labels
+                                    this.state.labels_select
                                 }
                             </div>
                         </td>
-                        <td className={styles.tdNames}><SongNames token={this.props.token} keySource={this.state.key_source} keyLabels={this.state.key_for_song_names} songNames={this.state.query_by_labels_result_song_names} /></td>
+                        <td className={styles.tdNames}><SongNames token={this.props.token} keySource={this.state.key_source} keyLabels={this.state.key_items_for_song_names} songNames={this.state.query_by_labels_result_song_names} /></td>
                         <td className={styles.tdPic}><SongPicture /></td>
                         <td className={styles.tdGroup}>
                             <div id="hymnGroups">
                                 {
-                                    this.getGroups()
+                                    this.state.groups_select
                                 }
                             </div>
                         </td>
