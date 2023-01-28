@@ -81,9 +81,9 @@ class SongNames extends Component {
             console.log("using last props songNames:" + this.state.last_props_songNames)
         }
         return (
-            <div>
+            <div className={styles.songNameDiv}><ul>
                 <li><span className={styles.helloGo}>{this.props.keySource}{this.props.keyLabels}</span></li>
-                <li><input id="searchByName" placeholder="查找歌名" ref={this.searchByName} onKeyUp={this.clearSearchByName} onChange={this.changeName} /></li>
+                <li><input className={styles.searchByNameInput} id="searchByName" placeholder="查找歌名" ref={this.searchByName} onKeyUp={this.clearSearchByName} onChange={this.changeName} /></li>
                 <div id="hymnNames">
                     <MContext.Consumer>
                         {
@@ -98,7 +98,7 @@ class SongNames extends Component {
                                                     songName)
                                             }}>
                                                 { songName }
-                                            </a>
+                                            </a><span className={styles.songAction}> >> </span>
                                         </li>
                                     } else {
                                         return ""
@@ -108,7 +108,7 @@ class SongNames extends Component {
                         }
                     </MContext.Consumer>
                 </div>
-            </div>
+            </ul></div>
         )
     }
 }

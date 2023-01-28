@@ -10,3 +10,15 @@
   background-color: #005ba6;
   cursor: pointer;
 }
+ul {
+  float: left;
+}
+.songAction {
+  float: right;
+}
+.songNameDiv {
+  clear: both;
+}
+.searchByNameInput {
+  width: 250px;
+}
