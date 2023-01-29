@@ -48,3 +48,6 @@
   background-color: #005ba6;
   cursor: pointer;
 }
+.songLabelSelect {
+  width: 200px;
+}

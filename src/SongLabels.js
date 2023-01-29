@@ -14,7 +14,7 @@ const GROUP2_SONGS_API_PREFIX_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + 
 const ELASTIC_SEARCH_SUMMARY_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/songs/summary';
 
 const LABEL_SOURCE = "标签："
-const GROUP_SOURCE = "组："
+const GROUP_SOURCE = "分类："
 const GO_GO_GO = "Warriors, Go!"
 const LABELS_SELECT_HEIGHT = 600
 const GROUPS_SELECT_SIZE = 40
@@ -242,8 +242,9 @@ class SongLabels extends React.Component {
         const { selectedOption } = this.state;
         return <div className={styles.container}>
             <Select
+                className={styles.songLabelSelect}
                 id="keyLabelId"
-                placeholder="查找标签"
+                placeholder="查找标签，例如：感恩"
                 isMulti
                 menuIsOpen
                 maxMenuHeight={LABELS_SELECT_HEIGHT}
@@ -375,7 +376,7 @@ class SongLabels extends React.Component {
                         <td>按标签过滤诗歌</td>
                         <td>诗歌列表【总数：<span title={"已打标签：" + this.state.elastic_search_annotated_tasks_count}>{this.state.elastic_search_total_tasks_count}</span>】</td>
                         <td>谱/歌词/相关经文/作者</td>
-                        <td>按组过滤诗歌</td>
+                        <td>按分类过滤诗歌</td>
                     </tr>
                     <tr>
                         <td className={styles.tdLabels}>

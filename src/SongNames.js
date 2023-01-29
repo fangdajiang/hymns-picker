@@ -2,6 +2,8 @@ import React, { Component} from "react";
 import {MContext} from "./index";
 import styles from './SongNames.module.css';
 import {fetchData, ZERO_RESULTS, NEED_MORE_WORDS} from "./common";
+import "semantic-ui-css/semantic.min.css";
+import { Popup } from "semantic-ui-react";
 
 const SONG_PICTURE_URL_PREFIX = 'https://hymns.oss-cn-shanghai.aliyuncs.com/pics/';
 const SONG_PICTURE_URL_SUFFIX = '.png?x-oss-process=image/resize,p_15';
@@ -81,25 +83,31 @@ class SongNames extends Component {
             console.log("using last props songNames:" + this.state.last_props_songNames)
         }
         return (
-            <div className={styles.songNameDiv}><ul>
-                <li><span className={styles.helloGo}>{this.props.keySource}{this.props.keyLabels}</span></li>
-                <li><input className={styles.searchByNameInput} id="searchByName" placeholder="查找歌名" ref={this.searchByName} onKeyUp={this.clearSearchByName} onChange={this.changeName} /></li>
+            <div className={styles.songNameDiv}>
+                <ul>
+                    <li><input className={styles.searchByNameInput} id="searchByName" placeholder="查找歌名，例如：平安夜" ref={this.searchByName} onKeyUp={this.clearSearchByName} onChange={this.changeName} /></li>
+                    <li><span className={styles.helloGo}>{this.props.keySource}{this.props.keyLabels}</span></li>
                 <div id="hymnNames">
                     <MContext.Consumer>
                         {
                             (context) => (
                                 this.state.query_result_song_names.split(',').map((songName, key) => {
                                     if (songName !== "") {
-                                        return <li key={key}>
-                                            <a className={styles.songName} href="#!" onClick={()=>{
-                                                context.setImage(
-                                                    SONG_PICTURE_URL_PREFIX + songName + SONG_PICTURE_URL_SUFFIX,
-                                                    SONG_PICTURE_URL_PREFIX + songName,
-                                                    songName)
-                                            }}>
-                                                { songName }
-                                            </a><span className={styles.songAction}> >> </span>
-                                        </li>
+                                        return <Popup
+                                            trigger={<li key={key}>
+                                                <a className={styles.songName} href="#!" onClick={()=>{
+                                                    context.setImage(
+                                                        SONG_PICTURE_URL_PREFIX + songName + SONG_PICTURE_URL_SUFFIX,
+                                                        SONG_PICTURE_URL_PREFIX + songName,
+                                                        songName)
+                                                }}>
+                                                    { songName }
+                                                </a><span className={styles.songAction}> >> </span>
+                                            </li>}
+                                            position="right center"
+                                        >
+                                            Tooltip for the register button
+                                        </Popup>
                                     } else {
                                         return ""
                                     }
