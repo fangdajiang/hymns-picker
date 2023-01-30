@@ -1,3 +1,7 @@
+export function Song(nameCn, labels) {
+    this.nameCn = nameCn;
+    this.labels = labels;
+}
 export async function fetchData(url, token) {
     return fetch(url, {
         headers: {
@@ -11,17 +15,23 @@ export async function fetchData(url, token) {
         });
 }
 export async function getTasks(apiUrl) {
-    let songNames = ""
+    let songs = []
     let resp = await fetchData(apiUrl);
     if (undefined !== resp) {
         for (let i in resp) {
-            // console.log("song name:'" + resp[i].nameCn + "'")
-            songNames += resp[i].nameCn + ","
+            songs.push(new Song(resp[i].nameCn, splitLabels(resp[i].labels)))
         }
     } else {
-        songNames = INVALID_BACKEND
+        songs.push(new Song(INVALID_BACKEND, INVALID_BACKEND))
     }
-    return songNames
+    return songs
+}
+export function splitLabels(unSplitLabels) {
+    let formattedLabels = ""
+    unSplitLabels.split(' ').map((label) => {
+        formattedLabels += label + "<br/>"
+    })
+    return formattedLabels
 }
 
 export const NOT_AVAILABLE = "(请稍等)"

@@ -1,9 +1,10 @@
 import React, { Component} from "react";
 import {MContext} from "./index";
 import styles from './SongNames.module.css';
-import {fetchData, ZERO_RESULTS, NEED_MORE_WORDS} from "./common";
+import {Song, fetchData, ZERO_RESULTS, NEED_MORE_WORDS, splitLabels} from "./common";
 import "semantic-ui-css/semantic.min.css";
 import { Popup } from "semantic-ui-react";
+import HtmlReactParser from 'html-react-parser';
 
 const SONG_PICTURE_URL_PREFIX = 'https://hymns.oss-cn-shanghai.aliyuncs.com/pics/';
 const SONG_PICTURE_URL_SUFFIX = '.png?x-oss-process=image/resize,p_15';
@@ -14,8 +15,8 @@ class SongNames extends Component {
         super(props);
         this.state = {
             filter_names:"",
-            last_props_songNames: this.props.songNames,
-            query_result_song_names: this.props.songNames,
+            last_props_songs: this.props.songs,
+            query_result_songs: this.props.songs,
             name:"Hello",
             joy:{
                 coding:"Go!"
@@ -28,43 +29,46 @@ class SongNames extends Component {
         if (event.key === "Escape" && this.searchByName.current.value.trim() !== ''){
             this.searchByName.current.value = "";
             this.searchByName.current.focus();
-            this.clearResults("")
+            let songs = []
+            this.clearResults(songs.push(new Song("", "")))
         }
     }
-    async findSongNames() {
-        console.log("find song names")
+    async findSongs() {
+        console.log("find songs")
 
         let resp = await fetchData(CN_SONGS_API_URL_PREFIX + this.state.filter_names);
         return resp;
     }
     queryByName() {
         console.log("queryByName")
-        let songNames = ""
         if (this.state.filter_names.trim().length > 1) {
-            this.findSongNames().then((resp) => {
+            this.findSongs().then((resp) => {
+                let songs = []
                 if (undefined !== resp && 0 !== resp.length) {
-                    console.log("found song names length:" + resp.length)
+                    console.log("found song length:", resp.length)
                     for (let i in resp) {
-                        songNames += resp[i].nameCn + ","
+                        songs.push(new Song(resp[i].nameCn, splitLabels(resp[i].labels)))
                     }
                 } else {
                     console.log("resp is undefined or length 0")
-                    songNames = ZERO_RESULTS
+                    songs.push(new Song(ZERO_RESULTS, ZERO_RESULTS))
                 }
                 this.setState({
-                    query_result_song_names: songNames
+                    query_result_songs: songs
                 })
             })
         } else if (this.state.filter_names.trim().length === 1) {
             console.log("filter_names length SHOULD > 1")
-            this.clearResults(NEED_MORE_WORDS)
+            let songs = []
+            this.clearResults(songs.push(new Song(NEED_MORE_WORDS, NEED_MORE_WORDS)))
         } else {
-            this.clearResults("")
+            let songs = []
+            this.clearResults(songs.push(new Song("", "")))
         }
     };
-    clearResults(empty) {
+    clearResults(emptyArray) {
         this.setState({
-            query_result_song_names: empty
+            query_result_songs: emptyArray
         })
     }
     changeName=(event)=> {
@@ -74,49 +78,48 @@ class SongNames extends Component {
     }
     render() {
         console.log("rendering SongNames")
-        if (this.state.last_props_songNames !== this.props.songNames) {
-            console.log("new results coming:" + this.props.songNames)
-            this.state.last_props_songNames = this.props.songNames
-            this.state.query_result_song_names = this.props.songNames
+        if (this.state.last_props_songs !== this.props.songs) {
+            console.log("new results coming:" + this.props.songs)
+            this.state.songs = this.props.songs
+            this.state.query_result_songs = this.props.songs
             document.getElementById("searchByName").value = ""
         } else {
-            console.log("using last props songNames:" + this.state.last_props_songNames)
+            console.log("using last props songs:" + this.state.last_props_songs)
         }
         return (
             <div className={styles.songNameDiv}>
                 <ul>
-                    <li><input className={styles.searchByNameInput} id="searchByName" placeholder="查找歌名，例如：平安夜" ref={this.searchByName} onKeyUp={this.clearSearchByName} onChange={this.changeName} /></li>
-                    <li><span className={styles.helloGo}>{this.props.keySource}{this.props.keyLabels}</span></li>
-                <div id="hymnNames">
+                    <li key="searchByNameKey"><input className={styles.searchByNameInput} id="searchByName" placeholder="查找歌名，例如：平安夜" ref={this.searchByName} onKeyUp={this.clearSearchByName} onChange={this.changeName} /></li>
+                    <li key="navKey"><span className={styles.helloGo}>{this.props.keySource}{this.props.keyLabels}</span></li>
                     <MContext.Consumer>
                         {
                             (context) => (
-                                this.state.query_result_song_names.split(',').map((songName, key) => {
-                                    if (songName !== "") {
-                                        return <Popup
-                                            trigger={<li key={key}>
-                                                <a className={styles.songName} href="#!" onClick={()=>{
-                                                    context.setImage(
-                                                        SONG_PICTURE_URL_PREFIX + songName + SONG_PICTURE_URL_SUFFIX,
-                                                        SONG_PICTURE_URL_PREFIX + songName,
-                                                        songName)
-                                                }}>
-                                                    { songName }
-                                                </a><span className={styles.songAction}> >> </span>
-                                            </li>}
-                                            position="right center"
-                                        >
-                                            Tooltip for the register button
-                                        </Popup>
-                                    } else {
-                                        return ""
-                                    }
-                                })
+                                this.state.query_result_songs.map((song, key) =>
+                                    <span key={key}>
+                                    <Popup
+                                        mouseEnterDelay={500}
+                                        trigger={<li>
+                                            <a className={styles.songName} href="#!" onClick={()=>{
+                                                context.setImage(
+                                                    SONG_PICTURE_URL_PREFIX + song.nameCn + SONG_PICTURE_URL_SUFFIX,
+                                                    SONG_PICTURE_URL_PREFIX + song.nameCn,
+                                                    song.nameCn)
+                                            }}>
+                                                { song.nameCn }
+                                            </a><span className={styles.songAction}> >> </span>
+                                        </li>}
+                                        position="right center"
+                                        content={ HtmlReactParser(song.labels) }
+                                        size="large"
+                                        header="相关标签"
+                                    />
+                                    </span>
+                                )
                             )
                         }
                     </MContext.Consumer>
-                </div>
-            </ul></div>
+                </ul>
+            </div>
         )
     }
 }

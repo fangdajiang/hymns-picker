@@ -3,7 +3,7 @@ import Select, { components } from "react-select";
 import SongNames from "./SongNames";
 import styles from "./SongLabels.module.css";
 import SongPicture from "./SongPicture";
-import { fetchData, NOT_AVAILABLE, ZERO_RESULTS, getTasks } from "./common";
+import {fetchData, NOT_AVAILABLE, ZERO_RESULTS, getTasks, Song} from "./common";
 
 const CATEGORY_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/labels/categories';
 const LABELS_API_URL = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/labels';
@@ -81,7 +81,7 @@ class SongLabels extends React.Component {
             hymns_groups:[],
             selected_group2: "",
             group1_children_count:[],
-            query_by_labels_result_song_names: "",
+            query_by_labels_result_songs: [],
             elastic_search_total_tasks_count:"?",
             elastic_search_annotated_tasks_count:"?",
         }
@@ -94,7 +94,7 @@ class SongLabels extends React.Component {
             this.keyLabelRef.current.clearValue()
             this.state.key_items_for_song_names = GO_GO_GO
             this.setState({
-                query_by_labels_result_song_names: "",
+                query_by_labels_result_songs: [],
             })
         }
     }
@@ -112,7 +112,7 @@ class SongLabels extends React.Component {
                     this.queryByLabels()
                 } else {
                     this.setState({
-                        query_by_labels_result_song_names: "",
+                        query_by_labels_result_songs: [],
                     })
                 }
             }
@@ -150,7 +150,7 @@ class SongLabels extends React.Component {
     }
     queryByLabels() {
         console.log("queryByLabels")
-        let songNames = NOT_AVAILABLE
+        let tip = NOT_AVAILABLE
 
         let zeroAnnotatedLabelSong = findZeroAnnotatedSong(this.annotatedLabelSongs, this.state.selected_labels);
         console.log("zeroAnnotatedLabelSong:'" + zeroAnnotatedLabelSong + "'")
@@ -162,25 +162,23 @@ class SongLabels extends React.Component {
                 }
                 getTasks(TASK_API_PREFIX_URL + selectedLabelsAsQueryString).then((resp) => {
                     console.log("resp:'" + resp + "'")
-                    if (resp.trim().length === 0) {
-                        resp = ZERO_RESULTS
+                    if (resp.length === 0) {
+                        let songs = []
+                        songs.push(new Song(ZERO_RESULTS, ZERO_RESULTS))
+                        resp = songs
                     }
                     this.setState({
-                        query_by_labels_result_song_names: resp
+                        query_by_labels_result_songs: resp
                     })
                 })
                 console.log("getTasks done")
             } else {
-                songNames = "(0 label selected.)"
-                this.setState({
-                    query_by_labels_result_song_names: songNames
-                })
+                tip = "(0 label selected.)"
+                this.state.query_by_labels_result_songs.push(new Song(tip, tip))
             }
         } else {
-            songNames = "(selected label '" + zeroAnnotatedLabelSong + "' has not been labeled by any Hymn.)"
-            this.setState({
-                query_by_labels_result_song_names: songNames
-            })
+            tip = "(selected label '" + zeroAnnotatedLabelSong + "' has not been labeled by any Hymn.)"
+            this.state.query_by_labels_result_songs.push(new Song(tip, tip))
         }
     };
     getLabelsOptions() {
@@ -274,7 +272,7 @@ class SongLabels extends React.Component {
     }
     queryByGroup2() {
         console.log("queryByGroup2")
-        let songNames = NOT_AVAILABLE
+        let tip = NOT_AVAILABLE
 
         let zeroAnnotatedLabelSong = findZeroAnnotatedSong(this.annotatedGroupSongs, this.state.selected_group2);
         console.log("zeroAnnotatedLabelSong:'" + zeroAnnotatedLabelSong + "'")
@@ -283,24 +281,22 @@ class SongLabels extends React.Component {
             if (this.state.selected_group2.length > 0) {
                 getTasks(GROUP2_SONGS_API_PREFIX_URL + this.state.selected_group2).then((resp) => {
                     console.log("resp:'" + resp + "'")
-                    if (resp.trim().length === 0) {
-                        resp = ZERO_RESULTS
+                    if (resp.length === 0) {
+                        let songs = []
+                        songs.push(new Song(ZERO_RESULTS, ZERO_RESULTS))
+                        resp = songs
                     }
                     this.setState({
-                        query_by_labels_result_song_names: resp
+                        query_by_labels_result_songs: resp
                     })
                 })
             } else {
-                songNames = "(0 group selected.)"
-                this.setState({
-                    query_by_labels_result_song_names: songNames
-                })
+                tip = "(0 group selected.)"
+                this.state.query_by_labels_result_songs.push(new Song(tip, tip))
             }
         } else {
-            songNames = "(selected group '" + zeroAnnotatedLabelSong + "' doesn't have any Hymn.)"
-            this.setState({
-                query_by_labels_result_song_names: songNames
-            })
+            tip = "(selected group '" + zeroAnnotatedLabelSong + "' doesn't have any Hymn.)"
+            this.state.query_by_labels_result_songs.push(new Song(tip, tip))
         }
     };
     getGroupsSelect() {
@@ -386,7 +382,7 @@ class SongLabels extends React.Component {
                                 }
                             </div>
                         </td>
-                        <td className={styles.tdNames}><SongNames token={this.props.token} keySource={this.state.key_source} keyLabels={this.state.key_items_for_song_names} songNames={this.state.query_by_labels_result_song_names} /></td>
+                        <td className={styles.tdNames}><SongNames token={this.props.token} keySource={this.state.key_source} keyLabels={this.state.key_items_for_song_names} songs={this.state.query_by_labels_result_songs} /></td>
                         <td className={styles.tdPic}><SongPicture /></td>
                         <td className={styles.tdGroup}>
                             <div id="hymnGroups">
