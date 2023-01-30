@@ -29,7 +29,7 @@ export async function getTasks(apiUrl) {
 export function splitLabels(unSplitLabels) {
     let formattedLabels = ""
     unSplitLabels.split(' ').map((label) => {
-        formattedLabels += label + "<br/>"
+        formattedLabels += "<li>" + label + "</li>"
     })
     return formattedLabels
 }

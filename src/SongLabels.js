@@ -194,7 +194,6 @@ class SongLabels extends React.Component {
         return basicLabels
     }
     assembleLabelGroups(basicLabelIndex) {
-        console.log("assembleLabelGroups")
         this.basicLabelsChildrenCount = 0
         let songLabels = [];
         for (let categoryLabelIndex in this.state.song_labels) {

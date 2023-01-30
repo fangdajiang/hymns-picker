@@ -29,8 +29,7 @@ class SongNames extends Component {
         if (event.key === "Escape" && this.searchByName.current.value.trim() !== ''){
             this.searchByName.current.value = "";
             this.searchByName.current.focus();
-            let songs = []
-            this.clearResults(songs.push(new Song("", "")))
+            this.clearResults("")
         }
     }
     async findSongs() {
@@ -59,16 +58,16 @@ class SongNames extends Component {
             })
         } else if (this.state.filter_names.trim().length === 1) {
             console.log("filter_names length SHOULD > 1")
-            let songs = []
-            this.clearResults(songs.push(new Song(NEED_MORE_WORDS, NEED_MORE_WORDS)))
+            this.clearResults(NEED_MORE_WORDS)
         } else {
-            let songs = []
-            this.clearResults(songs.push(new Song("", "")))
+            this.clearResults("")
         }
     };
-    clearResults(emptyArray) {
+    clearResults(v) {
+        let songs = []
+        songs.push(new Song(v, v))
         this.setState({
-            query_result_songs: emptyArray
+            query_result_songs: songs
         })
     }
     changeName=(event)=> {
@@ -80,7 +79,7 @@ class SongNames extends Component {
         console.log("rendering SongNames")
         if (this.state.last_props_songs !== this.props.songs) {
             console.log("new results coming:" + this.props.songs)
-            this.state.songs = this.props.songs
+            this.state.last_props_songs = this.props.songs
             this.state.query_result_songs = this.props.songs
             document.getElementById("searchByName").value = ""
         } else {
