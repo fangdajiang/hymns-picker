@@ -10,14 +10,12 @@
   background-color: #005ba6;
   cursor: pointer;
 }
+.songName[tabindex]:focus {
+  color: #ffffff;
+  background-color: #005ba6;
+}
 ul {
   float: left;
-}
-.songAction {
-  float: right;
-}
-.songNameDiv {
-  clear: both;
 }
 .searchByNameInput {
   width: 200px;

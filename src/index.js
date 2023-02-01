@@ -71,6 +71,12 @@ class MyProvider extends React.Component {
             <MContext.Provider value={
                 {
                     state: this.state,
+                    setAudio: (url) =>
+                        this.setState(
+                            {
+                                audioUrl: url
+                            }
+                        ),
                     setImage: (resized, original, txt) =>
                         this.setState(
                             {

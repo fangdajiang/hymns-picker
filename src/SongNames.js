@@ -8,6 +8,8 @@ import HtmlReactParser from 'html-react-parser';
 
 const SONG_PICTURE_URL_PREFIX = 'https://hymns.oss-cn-shanghai.aliyuncs.com/pics/';
 const SONG_PICTURE_URL_SUFFIX = '.png?x-oss-process=image/resize,p_15';
+const SONG_AUDIO_URL_PREFIX = 'https://hymns.oss-cn-shanghai.aliyuncs.com/mp3/';
+const SONG_AUDIO_URL_SUFFIX = '.mp3';
 const CN_SONGS_API_URL_PREFIX = process.env.REACT_APP_HYMNS_DIGGER_DOMAIN + '/songs/cnSongs?name=';
 
 class SongNames extends Component {
@@ -46,11 +48,11 @@ class SongNames extends Component {
                 if (undefined !== resp && 0 !== resp.length) {
                     console.log("found song length:", resp.length)
                     for (let i in resp) {
-                        songs.push(new Song(resp[i].nameCn, splitLabels(resp[i].labels)))
+                        songs.push(new Song(resp[i].nameCn, resp[i].nameEn, splitLabels(resp[i].labels)))
                     }
                 } else {
                     console.log("resp is undefined or length 0")
-                    songs.push(new Song(ZERO_RESULTS, ZERO_RESULTS))
+                    songs.push(new Song(ZERO_RESULTS, ZERO_RESULTS, ZERO_RESULTS))
                 }
                 this.setState({
                     query_result_songs: songs
@@ -65,7 +67,7 @@ class SongNames extends Component {
     };
     clearResults(v) {
         let songs = []
-        songs.push(new Song(v, v))
+        songs.push(new Song(v, v, v))
         this.setState({
             query_result_songs: songs
         })
@@ -86,7 +88,7 @@ class SongNames extends Component {
             console.log("using last props songs:" + this.state.last_props_songs)
         }
         return (
-            <div className={styles.songNameDiv}>
+            <div>
                 <ul>
                     <li key="searchByNameKey"><input className={styles.searchByNameInput} id="searchByName" placeholder="查找歌名，例如：平安夜" ref={this.searchByName} onKeyUp={this.clearSearchByName} onChange={this.changeName} /></li>
                     <li key="navKey"><span className={styles.helloGo}>{this.props.keySource}{this.props.keyLabels}</span></li>
@@ -98,14 +100,15 @@ class SongNames extends Component {
                                     <Popup
                                         mouseEnterDelay={500}
                                         trigger={<li>
-                                            <a className={styles.songName} href="#!" onClick={()=>{
+                                            <a id={"songName" + key} tabIndex={key} className={styles.songName} href="#!" onClick={()=>{
                                                 context.setImage(
                                                     SONG_PICTURE_URL_PREFIX + song.nameCn + SONG_PICTURE_URL_SUFFIX,
                                                     SONG_PICTURE_URL_PREFIX + song.nameCn,
                                                     song.nameCn)
+                                                context.setAudio(SONG_AUDIO_URL_PREFIX + song.nameCn + SONG_AUDIO_URL_SUFFIX)
                                             }}>
                                                 { song.nameCn }
-                                            </a><span className={styles.songAction}> >> </span>
+                                            </a>
                                         </li>}
                                         position="right center"
                                         content={ HtmlReactParser(song.labels) }

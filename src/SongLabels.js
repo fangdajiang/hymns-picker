@@ -164,7 +164,7 @@ class SongLabels extends React.Component {
                     console.log("resp:'" + resp + "'")
                     if (resp.length === 0) {
                         let songs = []
-                        songs.push(new Song(ZERO_RESULTS, ZERO_RESULTS))
+                        songs.push(new Song(ZERO_RESULTS, ZERO_RESULTS, ZERO_RESULTS))
                         resp = songs
                     }
                     this.setState({
@@ -174,11 +174,11 @@ class SongLabels extends React.Component {
                 console.log("getTasks done")
             } else {
                 tip = "(0 label selected.)"
-                this.state.query_by_labels_result_songs.push(new Song(tip, tip))
+                this.state.query_by_labels_result_songs.push(new Song(tip, tip, tip))
             }
         } else {
             tip = "(selected label '" + zeroAnnotatedLabelSong + "' has not been labeled by any Hymn.)"
-            this.state.query_by_labels_result_songs.push(new Song(tip, tip))
+            this.state.query_by_labels_result_songs.push(new Song(tip, tip, tip))
         }
     };
     getLabelsOptions() {
@@ -282,7 +282,7 @@ class SongLabels extends React.Component {
                     console.log("resp:'" + resp + "'")
                     if (resp.length === 0) {
                         let songs = []
-                        songs.push(new Song(ZERO_RESULTS, ZERO_RESULTS))
+                        songs.push(new Song(ZERO_RESULTS, ZERO_RESULTS, ZERO_RESULTS))
                         resp = songs
                     }
                     this.setState({
@@ -291,11 +291,11 @@ class SongLabels extends React.Component {
                 })
             } else {
                 tip = "(0 group selected.)"
-                this.state.query_by_labels_result_songs.push(new Song(tip, tip))
+                this.state.query_by_labels_result_songs.push(new Song(tip, tip, tip))
             }
         } else {
             tip = "(selected group '" + zeroAnnotatedLabelSong + "' doesn't have any Hymn.)"
-            this.state.query_by_labels_result_songs.push(new Song(tip, tip))
+            this.state.query_by_labels_result_songs.push(new Song(tip, tip, tip))
         }
     };
     getGroupsSelect() {

@@ -1,6 +1,7 @@
 import React, { Component} from "react";
 import {MContext} from "./index";
 import styles from "./SongPicture.module.css";
+import AudioPlayer from "react-audio-player";
 
 class SongPicture extends Component {
     constructor(props) {
@@ -13,6 +14,13 @@ class SongPicture extends Component {
     render() {
         return (
             <div>
+                <div><MContext.Consumer>
+                    {
+                        (context) => (
+                            <AudioPlayer preload="none" src={context.state.audioUrl} controls />
+                        )
+                    }
+                </MContext.Consumer></div>
                 <div><MContext.Consumer>
                     {
                         (context) => (

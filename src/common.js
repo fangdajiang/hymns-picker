@@ -1,5 +1,6 @@
-export function Song(nameCn, labels) {
-    this.nameCn = nameCn;
+export function Song(nameCn, nameEn, labels) {
+    this.nameCn = nameCn.trim();
+    this.nameEn = nameEn.trim();
     this.labels = labels;
 }
 export async function fetchData(url, token) {
@@ -19,10 +20,10 @@ export async function getTasks(apiUrl) {
     let resp = await fetchData(apiUrl);
     if (undefined !== resp) {
         for (let i in resp) {
-            songs.push(new Song(resp[i].nameCn, splitLabels(resp[i].labels)))
+            songs.push(new Song(resp[i].nameCn, resp[i].nameEn, splitLabels(resp[i].labels)))
         }
     } else {
-        songs.push(new Song(INVALID_BACKEND, INVALID_BACKEND))
+        songs.push(new Song(INVALID_BACKEND, INVALID_BACKEND, INVALID_BACKEND))
     }
     return songs
 }
