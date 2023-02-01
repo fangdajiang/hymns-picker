@@ -24,7 +24,7 @@ class Index extends React.Component {
                         <tbody>
                         <tr>
                             <td className={styles.caption}>
-                                TLBC 三分钟选歌 <font size = "4">(v0.6.0)</font>
+                                TLBC 三分钟选歌 <font size = "4">(v0.7.0)</font>
                             </td>
                         </tr>
                         <tr>
